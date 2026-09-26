@@ -1,0 +1,78 @@
+name: ai-knowledge-assistant
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: aka-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-aka}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aka_dev_password}
+      POSTGRES_DB: ${POSTGRES_DB:-aiknowledgeassistant}
+    ports:
+      - "5432:5432"
+    volumes:
+      - aka_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-aka} -d ${POSTGRES_DB:-aiknowledgeassistant}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  mongodb:
+    image: mongo:7
+    container_name: aka-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME:-aka}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD:-aka_dev_password}
+    ports:
+      - "27017:27017"
+    volumes:
+      - aka_mongodb_data:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mongosh \"mongodb://$${MONGO_INITDB_ROOT_USERNAME}:$${MONGO_INITDB_ROOT_PASSWORD}@localhost:27017/admin\" --quiet --eval \"db.runCommand({ ping: 1 }).ok\"",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  redis:
+    image: redis:7-alpine
+    container_name: aka-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - aka_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: aka-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-aka}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-aka_dev_password}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - aka_rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  aka_postgres_data:
+  aka_mongodb_data:
+  aka_redis_data:
+  aka_rabbitmq_data:

@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/Api/">
+    <Project Path="Api/AIKnowledgeAssistant.Api/AIKnowledgeAssistant.Api.csproj" />
+  </Folder>
+  <Folder Name="/Application/">
+    <Project Path="Application/AIKnowledgeAssistant.Application/AIKnowledgeAssistant.Application.csproj" />
+  </Folder>
+  <Folder Name="/Domain/">
+    <Project Path="Domain/AIKnowledgeAssistant.Domain/AIKnowledgeAssistant.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Infrastructure/">
+    <Project Path="Infrastructure/AIKnowledgeAssistant.Infrastructure/AIKnowledgeAssistant.Infrastructure.csproj" />
+  </Folder>
+  <Project Path="../tests/AIKnowledgeAssistant.IntegrationTests/AIKnowledgeAssistant.IntegrationTests.csproj" />
+  <Project Path="../tests/AIKnowledgeAssistant.UnitTests/AIKnowledgeAssistant.UnitTests.csproj" />
+</Solution>

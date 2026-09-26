@@ -1,0 +1,18 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+TestResults/
+
+## Environment
+.env
+docker/.env
+
+## Node (client, later)
+node_modules/
+dist/
+
+## OS
+.DS_Store
