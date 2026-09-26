@@ -79,21 +79,24 @@ Application settings live under `src/Api/AIKnowledgeAssistant.Api/appsettings*.j
 
 ## Development workflow
 
-Aligned with Notion tasks (P0–P12):
+Full rules: **[docs/development/ai-coding-guidelines.md](docs/development/ai-coding-guidelines.md)**.
+
+Aligned with [Notion tasks](https://app.notion.com/p/290170951615400186ccceea12cb1dd4) (P0–P12):
 
 1. **Learn** — understand the topic  
 2. **Analyze** — review existing code  
 3. **Plan** — agree on a small implementation plan  
-4. **Implement** — incremental changes  
+4. **Implement** — on a branch named for the task (e.g. `P1-01`)  
 5. **Test** — unit / integration as appropriate  
-6. **Explain** — document what changed and why  
-7. **Done** — acceptance criteria + learning notes + interview prep  
+6. **Explain** — **update the Notion task** with what changed, why, and how to verify  
+7. **Done** — acceptance criteria + task notes + learning / interview prep when required  
 
-### Cursor rules
+### Cursor rules (summary)
 
-- Start from the task’s **Cursor Prompt** in Notion when available.  
-- Ask for analysis and a plan before large refactors.  
-- Prefer small PRs; update README or ADRs when decisions change.  
+- Use the task’s **Cursor Prompt** in Notion when available.  
+- Match work to the **current branch task id** (e.g. `P2-01`).  
+- **Every completed task:** write the implementation summary on the Notion task page (not only in chat).  
+- Plan before large refactors; small PRs; update README/ADRs when decisions change.  
 - Do not commit `.env` or API keys.  
 
 ## Testing
