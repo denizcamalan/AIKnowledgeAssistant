@@ -111,6 +111,8 @@ Full rules: **[docs/development/ai-coding-guidelines.md](docs/development/ai-cod
 
 **P1-04 DI lab (Development):** `GET /api/labs/di` — transient/scoped/singleton snapshot; details in [docs/development/di-lifetime-lab.md](docs/development/di-lifetime-lab.md).
 
+**P1-05 errors:** global `IExceptionHandler` + `traceId` on all ProblemDetails; see [docs/development/global-exception-handling.md](docs/development/global-exception-handling.md).
+
 Aligned with [Notion tasks](https://app.notion.com/p/290170951615400186ccceea12cb1dd4) (P0–P12):
 
 1. **Learn** — understand the topic  

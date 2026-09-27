@@ -51,11 +51,13 @@ Include at minimum:
 
 Also update when applicable:
 
-- **Status** → Done (or In progress)
+- **Status** → **Done** (task bittiğinde zorunlu; sadece In progress bırakma)
 - **Branch / PR** → branch name and PR URL
-- **Öğrenme notlarım** / **Interview questions** — per Notion Definition of Done for that phase
+- **Interview Questions** (database property) → task’taki mülakat sorularının cevapları (özet metin)
+- **Öğrenme notlarım** / **Mülakat hazırlığı** (sayfa içeriği) → doldurulmuş; boş şablon bırakma
+- **Definition of Done** → tüm maddeler işaretli
 
-AI assistants (Cursor): after **Implement** and **Test**, draft this text for the user or apply it via Notion if the integration is available; never skip the **Explain** content that belongs on the task page.
+AI assistants (Cursor): after **Implement** and **Test**, **always** update the Notion task via MCP when available: set Status to Done, fill Interview Questions + page sections (Uygulama özeti, öğrenme notları, mülakat cevapları). Do not rely on chat-only summaries. See `.cursor/rules/notion-task-completion.mdc`.
 
 ---
 

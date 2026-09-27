@@ -1,0 +1,24 @@
+---
+description: Her Notion task tamamlandığında Status Done, mülakat cevapları ve özet zorunlu
+alwaysApply: true
+---
+
+# Notion task tamamlama (zorunlu)
+
+Bir Notion task (P0–P12) implementasyonu bittiğinde **chat özeti yeterli değildir** — Notion sayfasını güncelle.
+
+## Zorunlu adımlar
+
+1. **Status** → `Done` (In progress / Not started değil).
+2. **Interview Questions** (database property) — task’taki mülakat sorularının **kısa cevaplarını** yaz (Türkçe veya task dilinde).
+3. Sayfa içeriği:
+   - **Uygulama özeti** — ne değişti, neden, nasıl doğrulanır, out of scope.
+   - **Öğrenme notlarım** — doldurulmuş maddeler (boş şablon bırakma).
+   - **Mülakat hazırlığı** — her soru + “seçimin dezavantajı” cevabı.
+   - **Definition of Done** — tüm kutular `[x]`.
+
+## Sıra
+
+Implement → Test (`dotnet test` vb.) → **Notion güncelle** → kullanıcıya özet.
+
+Notion MCP kullanılabilirse güncellemeyi agent yapar; kullanıcıdan ayrıca istenmez.

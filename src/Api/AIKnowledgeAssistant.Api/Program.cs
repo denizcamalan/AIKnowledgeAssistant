@@ -1,4 +1,5 @@
 using AIKnowledgeAssistant.Api.Configuration;
+using AIKnowledgeAssistant.Api.ExceptionHandling;
 using AIKnowledgeAssistant.Api.LifetimeLab;
 using AIKnowledgeAssistant.Application;
 using AIKnowledgeAssistant.Infrastructure;
@@ -13,7 +14,7 @@ if (builder.Environment.IsDevelopment())
 {
     builder.Services.AddLifetimeLab();
 }
-builder.Services.AddProblemDetails();
+builder.Services.AddApiExceptionHandling();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -22,6 +23,8 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

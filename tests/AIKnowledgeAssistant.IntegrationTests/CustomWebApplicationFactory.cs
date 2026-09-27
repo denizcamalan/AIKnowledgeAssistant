@@ -29,12 +29,15 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureAppConfiguration(config =>
+        var connectionString = ResolveConnectionString();
+        builder.UseSetting("ConnectionStrings:DefaultConnection", connectionString);
+
+        builder.ConfigureAppConfiguration((_, configBuilder) =>
         {
-            config.AddInMemoryCollection(new Dictionary<string, string?>
+            configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["DocumentStorage:RootPath"] = _uploadRoot,
-                ["ConnectionStrings:DefaultConnection"] = ResolveConnectionString(),
+                ["ConnectionStrings:DefaultConnection"] = connectionString,
             });
         });
     }

@@ -1,6 +1,5 @@
 using AIKnowledgeAssistant.Api.Contracts.Documents;
 using AIKnowledgeAssistant.Application.Documents;
-using AIKnowledgeAssistant.Domain.Documents;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AIKnowledgeAssistant.Api.Controllers;
@@ -26,15 +25,8 @@ public sealed class DocumentsController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<DocumentDetailDto>> GetById(Guid id, CancellationToken cancellationToken)
     {
-        try
-        {
-            var document = await _documentService.GetByIdAsync(id, cancellationToken);
-            return Ok(DocumentDtoMapping.ToDto(document));
-        }
-        catch (DocumentNotFoundException ex)
-        {
-            return NotFoundProblem(ex.Message);
-        }
+        var document = await _documentService.GetByIdAsync(id, cancellationToken);
+        return Ok(DocumentDtoMapping.ToDto(document));
     }
 
     [HttpPost]
@@ -55,30 +47,19 @@ public sealed class DocumentsController : ControllerBase
             }));
         }
 
-        try
-        {
-            await using var stream = file.OpenReadStream();
-            var document = await _documentService.UploadAsync(
-                stream,
-                file.FileName,
-                file.ContentType,
-                file.Length,
-                displayName,
-                cancellationToken);
+        await using var stream = file.OpenReadStream();
+        var document = await _documentService.UploadAsync(
+            stream,
+            file.FileName,
+            file.ContentType,
+            file.Length,
+            displayName,
+            cancellationToken);
 
-            return CreatedAtAction(
-                nameof(GetById),
-                new { id = document.Id },
-                DocumentDtoMapping.ToDto(document));
-        }
-        catch (DuplicateDocumentException ex)
-        {
-            return ConflictProblem(ex.Message);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequestProblem(ex.Message);
-        }
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = document.Id },
+            DocumentDtoMapping.ToDto(document));
     }
 
     [HttpPut("{id:guid}")]
@@ -95,19 +76,8 @@ public sealed class DocumentsController : ControllerBase
             return ValidationProblem(ModelState);
         }
 
-        try
-        {
-            var document = await _documentService.UpdateAsync(id, request.DisplayName, cancellationToken);
-            return Ok(DocumentDtoMapping.ToDto(document));
-        }
-        catch (DocumentNotFoundException ex)
-        {
-            return NotFoundProblem(ex.Message);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequestProblem(ex.Message);
-        }
+        var document = await _documentService.UpdateAsync(id, request.DisplayName, cancellationToken);
+        return Ok(DocumentDtoMapping.ToDto(document));
     }
 
     [HttpDelete("{id:guid}")]
@@ -115,23 +85,7 @@ public sealed class DocumentsController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        try
-        {
-            await _documentService.DeleteAsync(id, cancellationToken);
-            return NoContent();
-        }
-        catch (DocumentNotFoundException ex)
-        {
-            return NotFoundProblem(ex.Message);
-        }
+        await _documentService.DeleteAsync(id, cancellationToken);
+        return NoContent();
     }
-
-    private ObjectResult NotFoundProblem(string detail) =>
-        Problem(statusCode: StatusCodes.Status404NotFound, title: "Not Found", detail: detail);
-
-    private ObjectResult ConflictProblem(string detail) =>
-        Problem(statusCode: StatusCodes.Status409Conflict, title: "Conflict", detail: detail);
-
-    private ObjectResult BadRequestProblem(string detail) =>
-        Problem(statusCode: StatusCodes.Status400BadRequest, title: "Bad Request", detail: detail);
 }
