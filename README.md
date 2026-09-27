@@ -115,6 +115,8 @@ Full rules: **[docs/development/ai-coding-guidelines.md](docs/development/ai-cod
 
 **P1-06 async:** `GET /api/labs/async` — I/O-bound vs CPU-bound and cooperative cancellation; see [docs/development/async-cancellation.md](docs/development/async-cancellation.md).
 
+**P1-07 tests:** xUnit unit suite + `WebApplicationFactory` integration tests; see [docs/development/testing.md](docs/development/testing.md) and [ADR-002](docs/adr/ADR-002-test-strategy.md).
+
 Aligned with [Notion tasks](https://app.notion.com/p/290170951615400186ccceea12cb1dd4) (P0–P12):
 
 1. **Learn** — understand the topic  
@@ -139,7 +141,7 @@ Aligned with [Notion tasks](https://app.notion.com/p/290170951615400186ccceea12c
 dotnet test src/AIKnowledgeAssistant.slnx
 ```
 
-Integration tests against Dockerized PostgreSQL will expand in P1-07.
+See [docs/development/testing.md](docs/development/testing.md). PostgreSQL-backed document flows use `AKA_RUN_POSTGRES_TESTS=1` with local Docker Postgres; Testcontainers come in P10-02.
 
 ## Repository layout
 

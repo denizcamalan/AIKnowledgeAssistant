@@ -32,6 +32,7 @@ When an ADR is replaced, set status to **Superseded by ADR-NNN** and add a line 
 | ADR | Title | Status |
 |-----|-------|--------|
 | [ADR-001](ADR-001-modular-monolith.md) | Modular monolith for the API host | Accepted |
+| [ADR-002](ADR-002-test-strategy.md) | xUnit unit + WebApplicationFactory integration; Postgres opt-in | Accepted |
 
 ### Legacy P0 drafts (superseded for new work)
 
@@ -45,7 +46,7 @@ Early bootstrap files used a `000N-` prefix. Prefer **ADR-NNN** for new decision
 | [0004](0004-jwt-bearer-auth.md) | JWT bearer auth |
 | [0005](0005-rag-before-semantic-kernel.md) | RAG before Semantic Kernel |
 
-Planned ADRs: chunking (P5), SSE vs WebSockets (P4), RabbitMQ ingestion (P7), MongoDB chat history (P7), file storage (P1), test strategy (P1-07).
+Planned ADRs: chunking (P5), SSE vs WebSockets (P4), RabbitMQ ingestion (P7), MongoDB chat history (P7), file storage (P1).
 
 ## Related
 
