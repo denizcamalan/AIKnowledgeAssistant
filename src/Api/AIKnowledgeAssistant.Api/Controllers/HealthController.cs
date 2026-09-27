@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AIKnowledgeAssistant.Api.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("health")]
 public sealed class HealthController : ControllerBase
 {
     [HttpGet]

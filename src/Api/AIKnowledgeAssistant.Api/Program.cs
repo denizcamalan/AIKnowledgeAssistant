@@ -1,7 +1,9 @@
+using AIKnowledgeAssistant.Api.Configuration;
 using AIKnowledgeAssistant.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.Configure<ApiSettings>(builder.Configuration.GetSection(ApiSettings.SectionName));
 builder.Services.AddInfrastructure();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -24,3 +26,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program;
