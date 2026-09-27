@@ -38,6 +38,7 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
             {
                 ["DocumentStorage:RootPath"] = _uploadRoot,
                 ["ConnectionStrings:DefaultConnection"] = connectionString,
+                ["Jwt:SigningKey"] = "integration-test-signing-key-min-32-chars",
             });
         });
     }
