@@ -53,18 +53,20 @@ dotnet build src/AIKnowledgeAssistant.slnx
 dotnet run --project src/Api/AIKnowledgeAssistant.Api
 ```
 
-- Swagger (Development): `https://localhost:7xxx/swagger` (see launchSettings)
+- Swagger (Development): [https://localhost:7191/swagger](https://localhost:7191/swagger) or [http://localhost:5149/swagger](http://localhost:5149/swagger) (see `launchSettings.json`)
 - Health: `GET /health`
+- API info (sample resource): `GET /api/info` — returns configured display name and environment
 
 ### 3. Configuration
 
-Application settings live under `src/Api/AIKnowledgeAssistant.Api/appsettings*.json`. Connection strings and API keys will be added in P1+; use user secrets or environment variables—never commit secrets.
+Application settings live under `src/Api/AIKnowledgeAssistant.Api/appsettings*.json`. The `Api:DisplayName` section differs in Development vs base config; override at runtime with environment variables (e.g. `Api__DisplayName=My Local API`). Connection strings and API keys arrive in later P1 tasks—use user secrets or environment variables; never commit secrets.
 
 ## API overview (planned)
 
 | Area | Endpoints (phases) |
 |------|---------------------|
-| Health | `GET /health` (P1) |
+| Health | `GET /health` |
+| Info (sample) | `GET /api/info` (P1) |
 | Auth | register/login, JWT (P2) |
 | Documents | upload, list, delete (P1–P5) |
 | Chat | RAG + SSE (P4–P5) |
