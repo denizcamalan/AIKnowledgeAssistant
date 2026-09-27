@@ -113,6 +113,8 @@ Full rules: **[docs/development/ai-coding-guidelines.md](docs/development/ai-cod
 
 **P1-05 errors:** global `IExceptionHandler` + `traceId` on all ProblemDetails; see [docs/development/global-exception-handling.md](docs/development/global-exception-handling.md).
 
+**P1-06 async:** `GET /api/labs/async` — I/O-bound vs CPU-bound and cooperative cancellation; see [docs/development/async-cancellation.md](docs/development/async-cancellation.md).
+
 Aligned with [Notion tasks](https://app.notion.com/p/290170951615400186ccceea12cb1dd4) (P0–P12):
 
 1. **Learn** — understand the topic  

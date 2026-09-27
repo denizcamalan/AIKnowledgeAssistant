@@ -14,6 +14,7 @@ Controller actions do not catch domain exceptions; `GlobalExceptionHandler` maps
 | `DocumentNotFoundException` | 404 |
 | `DuplicateDocumentException` | 409 |
 | `ArgumentException` (validation in services) | 400 |
+| `OperationCanceledException` while `RequestAborted` is set | not handled here (no body, debug log) |
 | Anything else | 500 |
 
 ## Response shape
@@ -25,6 +26,7 @@ All problem responses include extension `traceId` (from `HttpContext.TraceIdenti
 - **4xx (mapped domain):** `detail` = exception message (safe for clients).
 - **500:** Production returns a generic detail string; Development includes the exception message. Stack traces are never written to the response body.
 - **Logging:** 4xx mapped failures → `LogWarning`; unhandled 500 → `LogError` with full exception (server logs only).
+- **Client abort:** if the exception is `OperationCanceledException` and `HttpContext.RequestAborted` is cancelled, the handler returns `false`, writes no body, and logs at debug. The host completes the disconnect instead of turning it into a 500.
 
 ## Lab endpoint
 

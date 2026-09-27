@@ -46,6 +46,10 @@ internal sealed class LocalFileStorage : IFileStorage
 
     public Task DeleteAsync(string storagePath, CancellationToken cancellationToken)
     {
+        // File.Delete has no asynchronous API. Observe cancellation before the blocking call
+        // so an aborted request does not delete a file the caller already gave up on.
+        cancellationToken.ThrowIfCancellationRequested();
+
         var absolutePath = Path.Combine(_rootPath, storagePath.Replace('/', Path.DirectorySeparatorChar));
         if (File.Exists(absolutePath))
         {
