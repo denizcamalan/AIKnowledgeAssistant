@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Api\AIKnowledgeAssistant.Api\AIKnowledgeAssistant.Api.csproj" />
     <ProjectReference Include="..\..\src\Application\AIKnowledgeAssistant.Application\AIKnowledgeAssistant.Application.csproj" />
     <ProjectReference Include="..\..\src\Domain\AIKnowledgeAssistant.Domain\AIKnowledgeAssistant.Domain.csproj" />
   </ItemGroup>

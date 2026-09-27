@@ -56,10 +56,36 @@ dotnet run --project src/Api/AIKnowledgeAssistant.Api
 - Swagger (Development): [https://localhost:7191/swagger](https://localhost:7191/swagger) or [http://localhost:5149/swagger](http://localhost:5149/swagger) (see `launchSettings.json`)
 - Health: `GET /health`
 - API info (sample resource): `GET /api/info` — returns configured display name and environment
+- Documents: `GET/POST/PUT/DELETE /api/documents` (multipart upload for `POST`)
+
+Example upload:
+
+```bash
+curl -F "file=@./notes.txt" -F "displayName=My notes" http://localhost:5149/api/documents
+```
+
+Uploaded files are stored under `DocumentStorage:RootPath` (default `uploads/` under the API content root; not committed).
+
+Document metadata is stored in **PostgreSQL** (EF Core). After `docker compose` Postgres is up, apply migrations:
+
+```bash
+dotnet ef database update \
+  --project src/Infrastructure/AIKnowledgeAssistant.Infrastructure \
+  --startup-project src/Api/AIKnowledgeAssistant.Api
+```
+
+Match `ConnectionStrings:DefaultConnection` in `appsettings.Development.json` to your `docker/.env` (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`). Override with `ConnectionStrings__DefaultConnection` or user secrets.
+
+Database integration tests (document upload flow) run only when Postgres is available:
+
+```bash
+export AKA_RUN_POSTGRES_TESTS=1
+dotnet test src/AIKnowledgeAssistant.slnx
+```
 
 ### 3. Configuration
 
-Application settings live under `src/Api/AIKnowledgeAssistant.Api/appsettings*.json`. The `Api:DisplayName` section differs in Development vs base config; override at runtime with environment variables (e.g. `Api__DisplayName=My Local API`). Connection strings and API keys arrive in later P1 tasks—use user secrets or environment variables; never commit secrets.
+Application settings live under `src/Api/AIKnowledgeAssistant.Api/appsettings*.json`. The `Api:DisplayName` section differs in Development vs base config; override at runtime with environment variables (e.g. `Api__DisplayName=My Local API`). `DocumentStorage` controls upload path, max size, and allowed extensions (`DocumentStorage__MaxFileSizeBytes`). Use user secrets or environment variables for secrets—never commit passwords or API keys.
 
 ## API overview (planned)
 
@@ -67,8 +93,8 @@ Application settings live under `src/Api/AIKnowledgeAssistant.Api/appsettings*.j
 |------|---------------------|
 | Health | `GET /health` |
 | Info (sample) | `GET /api/info` (P1) |
+| Documents | `GET/POST/PUT/DELETE /api/documents` (P1) |
 | Auth | register/login, JWT (P2) |
-| Documents | upload, list, delete (P1–P5) |
 | Chat | RAG + SSE (P4–P5) |
 
 ## RAG pipeline (summary)
@@ -82,6 +108,8 @@ Application settings live under `src/Api/AIKnowledgeAssistant.Api/appsettings*.j
 ## Development workflow
 
 Full rules: **[docs/development/ai-coding-guidelines.md](docs/development/ai-coding-guidelines.md)**.
+
+**P1-04 DI lab (Development):** `GET /api/labs/di` — transient/scoped/singleton snapshot; details in [docs/development/di-lifetime-lab.md](docs/development/di-lifetime-lab.md).
 
 Aligned with [Notion tasks](https://app.notion.com/p/290170951615400186ccceea12cb1dd4) (P0–P12):
 

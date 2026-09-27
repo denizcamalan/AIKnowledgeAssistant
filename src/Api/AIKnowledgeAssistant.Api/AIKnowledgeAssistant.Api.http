@@ -1,5 +1,10 @@
 @AIKnowledgeAssistant.Api_HostAddress = http://localhost:5149
 
+GET {{AIKnowledgeAssistant.Api_HostAddress}}/api/labs/di
+Accept: application/json
+
+###
+
 GET {{AIKnowledgeAssistant.Api_HostAddress}}/health
 Accept: application/json
 
@@ -7,5 +12,29 @@ Accept: application/json
 
 GET {{AIKnowledgeAssistant.Api_HostAddress}}/api/info
 Accept: application/json
+
+###
+
+GET {{AIKnowledgeAssistant.Api_HostAddress}}/api/documents
+Accept: application/json
+
+###
+
+# Use REST Client multipart or curl:
+# curl -F "file=@./sample.txt" -F "displayName=My doc" http://localhost:5149/api/documents
+
+POST {{AIKnowledgeAssistant.Api_HostAddress}}/api/documents
+Content-Type: multipart/form-data; boundary=----akaBoundary
+
+------akaBoundary
+Content-Disposition: form-data; name="displayName"
+
+Sample upload
+------akaBoundary
+Content-Disposition: form-data; name="file"; filename="sample.txt"
+Content-Type: text/plain
+
+Hello from REST Client
+------akaBoundary--
 
 ###
