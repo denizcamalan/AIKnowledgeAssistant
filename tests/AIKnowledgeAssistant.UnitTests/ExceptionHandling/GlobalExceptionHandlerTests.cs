@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace AIKnowledgeAssistant.UnitTests.ExceptionHandling;
@@ -55,11 +56,32 @@ public sealed class GlobalExceptionHandlerTests
         Assert.Equal("trace-500", problem.GetProperty("traceId").GetString());
     }
 
-    private static GlobalExceptionHandler CreateHandler(string environments)
+    [Fact]
+    public async Task TryHandleAsync_RequestAborted_DoesNotWriteBody()
+    {
+        var logger = new RecordingLogger();
+        var handler = CreateHandler(Environments.Production, logger);
+        var context = new DefaultHttpContext { Response = { Body = new MemoryStream() } };
+        context.TraceIdentifier = "trace-abort";
+        context.RequestAborted = new CancellationToken(canceled: true);
+        context.RequestServices = CreateServices();
+
+        var handled = await handler.TryHandleAsync(
+            context,
+            new OperationCanceledException(context.RequestAborted),
+            context.RequestAborted);
+
+        Assert.False(handled);
+        Assert.Equal(StatusCodes.Status200OK, context.Response.StatusCode);
+        Assert.Equal(0, context.Response.Body.Length);
+        Assert.Equal(LogLevel.Debug, logger.Level);
+    }
+
+    private static GlobalExceptionHandler CreateHandler(string environments, ILogger<GlobalExceptionHandler>? logger = null)
     {
         var environment = new HostEnvironmentStub(environments);
         var factory = new TestProblemDetailsFactory();
-        return new GlobalExceptionHandler(NullLogger<GlobalExceptionHandler>.Instance, environment, factory);
+        return new GlobalExceptionHandler(logger ?? NullLogger<GlobalExceptionHandler>.Instance, environment, factory);
     }
 
     private static IServiceProvider CreateServices()
@@ -73,6 +95,34 @@ public sealed class GlobalExceptionHandlerTests
     {
         context.Response.Body.Position = 0;
         return await JsonSerializer.DeserializeAsync<JsonElement>(context.Response.Body);
+    }
+
+    private sealed class RecordingLogger : ILogger<GlobalExceptionHandler>
+    {
+        public LogLevel? Level { get; private set; }
+
+        public IDisposable BeginScope<TState>(TState state)
+            where TState : notnull =>
+            NullScope.Instance;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(
+            LogLevel logLevel,
+            EventId eventId,
+            TState state,
+            Exception? exception,
+            Func<TState, Exception?, string> formatter) =>
+            Level = logLevel;
+
+        private sealed class NullScope : IDisposable
+        {
+            public static readonly NullScope Instance = new();
+
+            public void Dispose()
+            {
+            }
+        }
     }
 
     private sealed class HostEnvironmentStub(string environmentName) : IHostEnvironment

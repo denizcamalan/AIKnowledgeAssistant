@@ -27,6 +27,14 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
         Exception exception,
         CancellationToken cancellationToken)
     {
+        if (exception is OperationCanceledException && httpContext.RequestAborted.IsCancellationRequested)
+        {
+            _logger.LogDebug(
+                "Request aborted before a response was written. TraceId={TraceId}",
+                httpContext.TraceIdentifier);
+            return false;
+        }
+
         var mapping = MapException(exception);
         var traceId = httpContext.TraceIdentifier;
 
