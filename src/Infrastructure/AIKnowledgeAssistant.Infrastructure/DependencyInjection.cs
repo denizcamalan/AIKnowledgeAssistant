@@ -1,5 +1,7 @@
+using AIKnowledgeAssistant.Application.Auth;
 using AIKnowledgeAssistant.Application.Configuration;
 using AIKnowledgeAssistant.Application.Documents;
+using AIKnowledgeAssistant.Infrastructure.Auth;
 using AIKnowledgeAssistant.Infrastructure.Documents;
 using AIKnowledgeAssistant.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +15,9 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<DocumentStorageOptions>(configuration.GetSection(DocumentStorageOptions.SectionName));
+        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.AddSingleton<IUserCredentialStore, DemoUserCredentialStore>();
+        services.AddSingleton<IAccessTokenFactory, JwtAccessTokenFactory>();
 
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         if (string.IsNullOrWhiteSpace(connectionString))

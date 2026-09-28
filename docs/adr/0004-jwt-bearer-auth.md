@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (implementation in P2)
+Accepted (implemented in P2-01)
 
 ## Context
 
