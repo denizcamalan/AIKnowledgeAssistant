@@ -135,7 +135,7 @@ Full rules: **[docs/development/ai-coding-guidelines.md](docs/development/ai-cod
 
 **P2-01 JWT:** `POST /api/auth/login`, protected `GET /api/account/me`; see [docs/development/jwt-authentication.md](docs/development/jwt-authentication.md).
 
-**P2-02 React shell:** `client/web` (Vite, React 18, TypeScript) with login, documents, and chat screens calling the API. Token handling details continue in P2-03.
+**P2-02 / P2-03 React shell:** `client/web` (Vite, React 18, TypeScript). The access token is kept in `localStorage` and sent as `Authorization: Bearer`. See [Frontend token storage](#frontend-token-storage-p2-03) below.
 
 Aligned with [Notion tasks](https://app.notion.com/p/290170951615400186ccceea12cb1dd4) (P0–P12):
 
@@ -154,6 +154,24 @@ Aligned with [Notion tasks](https://app.notion.com/p/290170951615400186ccceea12c
 - **Every completed task:** write the implementation summary on the Notion task page (not only in chat).  
 - Plan before large refactors; small PRs; update README/ADRs when decisions change.  
 - Do not commit `.env` or API keys.  
+
+## Frontend token storage (P2-03)
+
+The SPA stores the JWT access token in `localStorage` (`aka.session`) and attaches it on API calls. Logout and an expired `expiresAtUtc` remove it. A `401` from `GET /api/account/me` clears it as well.
+
+This is a learning choice for a local demo, not a production session design.
+
+**Risk.** Any script that runs on this origin can read `localStorage`. A cross-site scripting bug (unsafe HTML, a compromised dependency, a malicious browser extension on the page) can copy the token and call the API until the token expires. The token also survives closing the tab, so a shared computer keeps the session. `localStorage` is not protected by `HttpOnly`, so the browser cannot hide it from JavaScript.
+
+**What this demo does not do.** It does not store a refresh token, and it does not put the access token in a cookie. Document upload stays anonymous until a later task scopes data by user.
+
+**Production alternatives.**
+
+| Approach | What changes | Trade-off |
+|----------|----------------|-----------|
+| `HttpOnly` + `Secure` + `SameSite` cookie | The browser stores the session; JavaScript cannot read it | Needs CSRF protection and a same-site or carefully configured cross-site cookie |
+| Backend-for-frontend | The SPA talks to a same-origin server that holds the token | Extra hop; the browser never sees the raw JWT |
+| Memory-only access token | Token lives in a JavaScript variable and is dropped on refresh | Refresh needs a silent re-login or refresh cookie; XSS can still hook `fetch` during the session |
 
 ## Testing
 

@@ -20,6 +20,12 @@ Passwords are hashed with `PasswordHasher<T>` at startup; plain text is not stor
 
 `appsettings.Development.json` sets a dev signing key. Production must set `Jwt__SigningKey` (≥ 32 characters) via environment or user secrets — never commit real secrets.
 
+## Browser client (P2-03)
+
+`client/web` signs in with `POST /api/auth/login`, stores the access token in `localStorage`, and calls protected `GET /api/account/me` with `Authorization: Bearer`. Risks of that storage choice and production alternatives are in the README section **Frontend token storage (P2-03)**.
+
+In local dev, Vite proxies `/api` to `http://localhost:5149`. Direct calls from `http://localhost:5173` are allowed by `Cors:Origins`.
+
 ## Authentication vs authorization
 
 - **Authentication** (`UseAuthentication`, login): who is the caller?
