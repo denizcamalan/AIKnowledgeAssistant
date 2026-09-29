@@ -17,6 +17,7 @@ if (builder.Environment.IsDevelopment())
 }
 builder.Services.AddApiExceptionHandling();
 builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddSpaCors(builder.Configuration);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -35,6 +36,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors(SpaCorsExtensions.PolicyName);
 app.UseAuthentication();
 app.UseAuthorization();
 

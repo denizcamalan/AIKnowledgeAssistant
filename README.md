@@ -32,7 +32,7 @@ Decisions: [docs/adr/README.md](docs/adr/README.md).
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [Docker](https://www.docker.com/) (for local databases)
-- Node.js 20+ (when `client/web` is added in P2)
+- [Node.js 20+](https://nodejs.org/) and npm (for `client/web`)
 
 ## Quick start
 
@@ -83,7 +83,23 @@ export AKA_RUN_POSTGRES_TESTS=1
 dotnet test src/AIKnowledgeAssistant.slnx
 ```
 
-### 3. Configuration
+### 3. Web client
+
+```bash
+cd client/web
+npm install
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173). Vite proxies `/api` to `http://localhost:5149`, so start the API with the `http` launch profile. Sign in with `user@demo.local` / `User123!`.
+
+- Login calls `POST /api/auth/login`, then proves the token with protected `GET /api/account/me`.
+- Documents calls `GET /api/documents`.
+- Chat loads the same document list as context. Answers stay in component state until streaming RAG (P4).
+
+To call the API origin directly instead of the proxy, set `VITE_API_BASE_URL=http://localhost:5149`. The API allows that origin via `Cors:Origins`.
+
+### 4. Configuration
 
 Application settings live under `src/Api/AIKnowledgeAssistant.Api/appsettings*.json`. The `Api:DisplayName` section differs in Development vs base config; override at runtime with environment variables (e.g. `Api__DisplayName=My Local API`). `DocumentStorage` controls upload path, max size, and allowed extensions (`DocumentStorage__MaxFileSizeBytes`). Use user secrets or environment variables for secrets—never commit passwords or API keys.
 
@@ -94,8 +110,8 @@ Application settings live under `src/Api/AIKnowledgeAssistant.Api/appsettings*.j
 | Health | `GET /health` |
 | Info (sample) | `GET /api/info` (P1) |
 | Documents | `GET/POST/PUT/DELETE /api/documents` (P1) |
-| Auth | register/login, JWT (P2) |
-| Chat | RAG + SSE (P4–P5) |
+| Auth | `POST /api/auth/login`, `GET /api/account/me` (P2) |
+| Chat | React shell now; RAG + SSE (P4–P5) |
 
 ## RAG pipeline (summary)
 
@@ -119,6 +135,8 @@ Full rules: **[docs/development/ai-coding-guidelines.md](docs/development/ai-cod
 
 **P2-01 JWT:** `POST /api/auth/login`, protected `GET /api/account/me`; see [docs/development/jwt-authentication.md](docs/development/jwt-authentication.md).
 
+**P2-02 React shell:** `client/web` (Vite, React 18, TypeScript) with login, documents, and chat screens calling the API. Token handling details continue in P2-03.
+
 Aligned with [Notion tasks](https://app.notion.com/p/290170951615400186ccceea12cb1dd4) (P0–P12):
 
 1. **Learn** — understand the topic  
@@ -141,6 +159,7 @@ Aligned with [Notion tasks](https://app.notion.com/p/290170951615400186ccceea12c
 
 ```bash
 dotnet test src/AIKnowledgeAssistant.slnx
+cd client/web && npm test && npm run build
 ```
 
 See [docs/development/testing.md](docs/development/testing.md). PostgreSQL-backed document flows use `AKA_RUN_POSTGRES_TESTS=1` with local Docker Postgres; Testcontainers come in P10-02.
