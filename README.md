@@ -32,7 +32,7 @@ Decisions: [docs/adr/README.md](docs/adr/README.md).
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [Docker](https://www.docker.com/) (for local databases)
-- Node.js 20+ (when `client/web` is added in P2)
+- [Node.js 20+](https://nodejs.org/) and npm (for `client/web`)
 
 ## Quick start
 
@@ -83,9 +83,35 @@ export AKA_RUN_POSTGRES_TESTS=1
 dotnet test src/AIKnowledgeAssistant.slnx
 ```
 
-### 3. Configuration
+### 3. Web client
 
-Application settings live under `src/Api/AIKnowledgeAssistant.Api/appsettings*.json`. The `Api:DisplayName` section differs in Development vs base config; override at runtime with environment variables (e.g. `Api__DisplayName=My Local API`). `DocumentStorage` controls upload path, max size, and allowed extensions (`DocumentStorage__MaxFileSizeBytes`). Use user secrets or environment variables for secrets—never commit passwords or API keys.
+```bash
+cd client/web
+npm install
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173). Vite proxies `/api` to `http://localhost:5149`, so start the API with the `http` launch profile. Sign in with `user@demo.local` / `User123!`.
+
+- Login calls `POST /api/auth/login`, then proves the token with protected `GET /api/account/me`.
+- Documents calls `GET /api/documents`.
+- Chat loads the same document list as context. Answers stay in component state until streaming RAG (P4).
+
+To call the API origin directly instead of the proxy, set `VITE_API_BASE_URL=http://localhost:5149`. The API allows that origin via `Cors:Origins`.
+
+### 4. Local LLM (Ollama, P3-01)
+
+For `POST /api/chat`, run Ollama and pull the configured model (default `qwen3:4b`). Details: [docs/development/llm-ollama.md](docs/development/llm-ollama.md).
+
+**P3-02 prompt lab:** `POST /api/labs/prompts/compare` (JWT) — baseline vs constrained vs grounded; see [docs/development/prompt-lab.md](docs/development/prompt-lab.md).
+
+```bash
+ollama pull qwen3:4b
+```
+
+### 5. Configuration
+
+Application settings live under `src/Api/AIKnowledgeAssistant.Api/appsettings*.json`. The `Api:DisplayName` section differs in Development vs base config; override at runtime with environment variables (e.g. `Api__DisplayName=My Local API`). `DocumentStorage` controls upload path, max size, and allowed extensions (`DocumentStorage__MaxFileSizeBytes`). `Llm:Provider` and `Llm:Ollama` select the chat backend. Use user secrets or environment variables for secrets—never commit passwords or API keys.
 
 ## API overview (planned)
 
@@ -94,8 +120,8 @@ Application settings live under `src/Api/AIKnowledgeAssistant.Api/appsettings*.j
 | Health | `GET /health` |
 | Info (sample) | `GET /api/info` (P1) |
 | Documents | `GET/POST/PUT/DELETE /api/documents` (P1) |
-| Auth | register/login, JWT (P2) |
-| Chat | RAG + SSE (P4–P5) |
+| Auth | `POST /api/auth/login`, `GET /api/account/me` (P2) |
+| Chat | `POST /api/chat` (P3); RAG + SSE (P4–P5) |
 
 ## RAG pipeline (summary)
 
@@ -115,6 +141,14 @@ Full rules: **[docs/development/ai-coding-guidelines.md](docs/development/ai-cod
 
 **P1-06 async:** `GET /api/labs/async` — I/O-bound vs CPU-bound and cooperative cancellation; see [docs/development/async-cancellation.md](docs/development/async-cancellation.md).
 
+**P3-02 prompts:** `POST /api/labs/prompts/compare` — three prompt variants and recorded metrics; see [docs/development/prompt-lab.md](docs/development/prompt-lab.md).
+
+**P1-07 tests:** xUnit unit suite + `WebApplicationFactory` integration tests; see [docs/development/testing.md](docs/development/testing.md) and [ADR-002](docs/adr/ADR-002-test-strategy.md).
+
+**P2-01 JWT:** `POST /api/auth/login`, protected `GET /api/account/me`; see [docs/development/jwt-authentication.md](docs/development/jwt-authentication.md).
+
+**P2-02 / P2-03 React shell:** `client/web` (Vite, React 18, TypeScript). The access token is kept in `localStorage` and sent as `Authorization: Bearer`. See [Frontend token storage](#frontend-token-storage-p2-03) below.
+
 Aligned with [Notion tasks](https://app.notion.com/p/290170951615400186ccceea12cb1dd4) (P0–P12):
 
 1. **Learn** — understand the topic  
@@ -133,13 +167,32 @@ Aligned with [Notion tasks](https://app.notion.com/p/290170951615400186ccceea12c
 - Plan before large refactors; small PRs; update README/ADRs when decisions change.  
 - Do not commit `.env` or API keys.  
 
+## Frontend token storage (P2-03)
+
+The SPA stores the JWT access token in `localStorage` (`aka.session`) and attaches it on API calls. Logout and an expired `expiresAtUtc` remove it. A `401` from `GET /api/account/me` clears it as well.
+
+This is a learning choice for a local demo, not a production session design.
+
+**Risk.** Any script that runs on this origin can read `localStorage`. A cross-site scripting bug (unsafe HTML, a compromised dependency, a malicious browser extension on the page) can copy the token and call the API until the token expires. The token also survives closing the tab, so a shared computer keeps the session. `localStorage` is not protected by `HttpOnly`, so the browser cannot hide it from JavaScript.
+
+**What this demo does not do.** It does not store a refresh token, and it does not put the access token in a cookie. Document upload stays anonymous until a later task scopes data by user.
+
+**Production alternatives.**
+
+| Approach | What changes | Trade-off |
+|----------|----------------|-----------|
+| `HttpOnly` + `Secure` + `SameSite` cookie | The browser stores the session; JavaScript cannot read it | Needs CSRF protection and a same-site or carefully configured cross-site cookie |
+| Backend-for-frontend | The SPA talks to a same-origin server that holds the token | Extra hop; the browser never sees the raw JWT |
+| Memory-only access token | Token lives in a JavaScript variable and is dropped on refresh | Refresh needs a silent re-login or refresh cookie; XSS can still hook `fetch` during the session |
+
 ## Testing
 
 ```bash
 dotnet test src/AIKnowledgeAssistant.slnx
+cd client/web && npm test && npm run build
 ```
 
-Integration tests against Dockerized PostgreSQL will expand in P1-07.
+See [docs/development/testing.md](docs/development/testing.md). PostgreSQL-backed document flows use `AKA_RUN_POSTGRES_TESTS=1` with local Docker Postgres; Testcontainers come in P10-02.
 
 ## Repository layout
 
