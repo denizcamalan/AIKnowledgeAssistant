@@ -1,0 +1,23 @@
+{
+  "recordedAt": "2026-09-29",
+  "source": "Shape reference — fill after POST /api/labs/tokens/context-experiment with Ollama",
+  "question": "Haftada kaç gün uzaktan çalışabilirim?",
+  "config": {
+    "contextWindowTokens": 8192,
+    "maxPromptTokens": 2048
+  },
+  "scenarios": [
+    {
+      "scenario": "short-context",
+      "expectedObservation": "Düşük promptTokens ve genelde en düşük durationMs"
+    },
+    {
+      "scenario": "long-context-raw",
+      "expectedObservation": "Yüksek promptTokens ve daha yüksek durationMs"
+    },
+    {
+      "scenario": "long-context-truncated",
+      "expectedObservation": "TruncationApplied true; promptTokens long-raw'dan düşük olmalı"
+    }
+  ]
+}

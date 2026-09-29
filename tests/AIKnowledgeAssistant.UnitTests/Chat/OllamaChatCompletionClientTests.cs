@@ -18,6 +18,9 @@ public sealed class OllamaChatCompletionClientTests
             var json = JsonSerializer.Serialize(new
             {
                 message = new { role = "assistant", content = "Merhaba!" },
+                prompt_eval_count = 42,
+                eval_count = 7,
+                total_duration = 25_000_000L,
             });
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
@@ -36,6 +39,9 @@ public sealed class OllamaChatCompletionClientTests
         Assert.Equal("Merhaba!", result.Content);
         Assert.Equal("qwen3:4b", result.Model);
         Assert.Equal(LlmProviders.Ollama, result.Provider);
+        Assert.Equal(42, result.TokenUsage.PromptTokens);
+        Assert.Equal(7, result.TokenUsage.CompletionTokens);
+        Assert.Equal(25L, result.ProviderDurationMs);
     }
 
     [Fact]

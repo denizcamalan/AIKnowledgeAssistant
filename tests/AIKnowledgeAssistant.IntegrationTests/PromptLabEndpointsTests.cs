@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using AIKnowledgeAssistant.Api.Contracts.Auth;
 using AIKnowledgeAssistant.Api.Contracts.PromptLab;
 using AIKnowledgeAssistant.Application.Chat;
+using AIKnowledgeAssistant.Application.Chat.Tokens;
 using AIKnowledgeAssistant.Application.Configuration;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -88,7 +89,8 @@ public sealed class PromptLabEndpointsTests : IClassFixture<CustomWebApplication
             return Task.FromResult(new ChatCompletionResult(
                 $"stub-{call}",
                 "stub-model",
-                LlmProviders.Ollama));
+                LlmProviders.Ollama,
+                new TokenUsage(call * 100, call * 10, call * 80, call * 8)));
         }
     }
 }

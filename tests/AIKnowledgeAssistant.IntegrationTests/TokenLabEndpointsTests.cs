@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using AIKnowledgeAssistant.Api.Contracts.Auth;
-using AIKnowledgeAssistant.Api.Contracts.Chat;
+using AIKnowledgeAssistant.Api.Contracts.Tokens;
 using AIKnowledgeAssistant.Application.Chat;
 using AIKnowledgeAssistant.Application.Chat.Tokens;
 using AIKnowledgeAssistant.Application.Configuration;
@@ -12,11 +12,11 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace AIKnowledgeAssistant.IntegrationTests;
 
-public sealed class ChatEndpointsTests : IClassFixture<CustomWebApplicationFactory>
+public sealed class TokenLabEndpointsTests : IClassFixture<CustomWebApplicationFactory>
 {
     private readonly HttpClient _client;
 
-    public ChatEndpointsTests(CustomWebApplicationFactory factory)
+    public TokenLabEndpointsTests(CustomWebApplicationFactory factory)
     {
         _client = factory.WithWebHostBuilder(builder =>
         {
@@ -29,31 +29,33 @@ public sealed class ChatEndpointsTests : IClassFixture<CustomWebApplicationFacto
     }
 
     [Fact]
-    public async Task PostChat_WithoutToken_ReturnsUnauthorized()
+    public async Task ContextExperiment_WithoutToken_ReturnsUnauthorized()
     {
         var response = await _client.PostAsJsonAsync(
-            "/api/chat",
-            new ChatRequestDto { Message = "Hello" });
+            "/api/labs/tokens/context-experiment",
+            new TokenContextExperimentRequestDto { Question = "Test?" });
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [Fact]
-    public async Task PostChat_WithToken_ReturnsAssistantMessage()
+    public async Task ContextExperiment_WithToken_ReturnsThreeScenarios()
     {
         var token = await LoginAsync();
-        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/chat");
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/api/labs/tokens/context-experiment");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        request.Content = JsonContent.Create(new ChatRequestDto { Message = "What is RAG?" });
+        request.Content = JsonContent.Create(new TokenContextExperimentRequestDto
+        {
+            Question = "Haftada kaç gün uzaktan çalışabilirim?",
+        });
 
         var response = await _client.SendAsync(request);
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var body = await response.Content.ReadFromJsonAsync<ChatResponseDto>();
+        var body = await response.Content.ReadFromJsonAsync<TokenContextExperimentResponseDto>();
         Assert.NotNull(body);
-        Assert.Equal("Stubbed assistant reply.", body.Message);
-        Assert.Equal(LlmProviders.Ollama, body.Provider);
-        Assert.Equal("stub-model", body.Model);
+        Assert.Equal(3, body.Scenarios.Count);
+        Assert.Contains(body.Scenarios, scenario => scenario.Scenario == "long-context-truncated");
     }
 
     private async Task<string> LoginAsync()
@@ -70,18 +72,24 @@ public sealed class ChatEndpointsTests : IClassFixture<CustomWebApplicationFacto
 
     private sealed class StubAiChatClientFactory : IAiChatClientFactory
     {
-        public IAiChatCompletionClient GetClient() => new StubAiChatCompletionClient();
+        private int _calls;
+
+        public IAiChatCompletionClient GetClient() => new StubAiChatCompletionClient(() => Interlocked.Increment(ref _calls));
     }
 
-    private sealed class StubAiChatCompletionClient : IAiChatCompletionClient
+    private sealed class StubAiChatCompletionClient(Func<int> nextCall) : IAiChatCompletionClient
     {
         public Task<ChatCompletionResult> CompleteAsync(
             ChatCompletionRequest request,
-            CancellationToken cancellationToken) =>
-            Task.FromResult(new ChatCompletionResult(
-                "Stubbed assistant reply.",
+            CancellationToken cancellationToken)
+        {
+            var call = nextCall();
+            return Task.FromResult(new ChatCompletionResult(
+                $"stub-{call}",
                 "stub-model",
                 LlmProviders.Ollama,
-                new TokenUsage(50, 10, 20, 10)));
+                new TokenUsage(call * 300, 15, call * 250, 15),
+                ProviderDurationMs: call * 5));
+        }
     }
 }

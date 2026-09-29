@@ -37,6 +37,11 @@ public sealed class ChatController : ControllerBase
             Message = reply.Content,
             Model = reply.Model,
             Provider = reply.Provider,
+            PromptTokens = reply.TokenUsage.PromptTokens,
+            CompletionTokens = reply.TokenUsage.CompletionTokens,
+            EstimatedPromptTokens = reply.TokenUsage.EstimatedPromptTokens,
+            EstimatedCompletionTokens = reply.TokenUsage.EstimatedCompletionTokens,
+            ProviderDurationMs = reply.ProviderDurationMs,
         });
     }
 }

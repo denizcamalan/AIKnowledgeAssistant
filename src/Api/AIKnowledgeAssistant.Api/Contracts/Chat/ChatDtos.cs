@@ -18,4 +18,14 @@ public sealed class ChatResponseDto
     public required string Model { get; set; }
 
     public required string Provider { get; set; }
+
+    public int? PromptTokens { get; set; }
+
+    public int? CompletionTokens { get; set; }
+
+    public int EstimatedPromptTokens { get; set; }
+
+    public int EstimatedCompletionTokens { get; set; }
+
+    public long? ProviderDurationMs { get; set; }
 }

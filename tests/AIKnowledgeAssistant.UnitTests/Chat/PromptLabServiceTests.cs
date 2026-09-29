@@ -1,4 +1,5 @@
 using AIKnowledgeAssistant.Application.Chat;
+using AIKnowledgeAssistant.Application.Chat.Tokens;
 using AIKnowledgeAssistant.Application.Chat.PromptLab;
 
 namespace AIKnowledgeAssistant.UnitTests.Chat;
@@ -44,7 +45,8 @@ public sealed class PromptLabServiceTests
             return Task.FromResult(new ChatReply(
                 $"reply-{CallCount}",
                 "test-model",
-                "Test"));
+                "Test",
+                new TokenUsage(CallCount * 10, CallCount * 2, CallCount, CallCount)));
         }
     }
 }

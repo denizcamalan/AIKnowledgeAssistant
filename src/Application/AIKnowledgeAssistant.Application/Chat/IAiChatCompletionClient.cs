@@ -11,4 +11,9 @@ public sealed record ChatCompletionRequest(
 
 public sealed record ChatMessage(string Role, string Content);
 
-public sealed record ChatCompletionResult(string Content, string Model, string Provider);
+public sealed record ChatCompletionResult(
+    string Content,
+    string Model,
+    string Provider,
+    Tokens.TokenUsage TokenUsage,
+    long? ProviderDurationMs = null);
