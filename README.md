@@ -99,9 +99,19 @@ Open [http://localhost:5173](http://localhost:5173). Vite proxies `/api` to `htt
 
 To call the API origin directly instead of the proxy, set `VITE_API_BASE_URL=http://localhost:5149`. The API allows that origin via `Cors:Origins`.
 
-### 4. Configuration
+### 4. Local LLM (Ollama, P3-01)
 
-Application settings live under `src/Api/AIKnowledgeAssistant.Api/appsettings*.json`. The `Api:DisplayName` section differs in Development vs base config; override at runtime with environment variables (e.g. `Api__DisplayName=My Local API`). `DocumentStorage` controls upload path, max size, and allowed extensions (`DocumentStorage__MaxFileSizeBytes`). Use user secrets or environment variables for secrets—never commit passwords or API keys.
+For `POST /api/chat`, run Ollama and pull the configured model (default `qwen3:4b`). Details: [docs/development/llm-ollama.md](docs/development/llm-ollama.md).
+
+**P3-02 prompt lab:** `POST /api/labs/prompts/compare` (JWT) — baseline vs constrained vs grounded; see [docs/development/prompt-lab.md](docs/development/prompt-lab.md).
+
+```bash
+ollama pull qwen3:4b
+```
+
+### 5. Configuration
+
+Application settings live under `src/Api/AIKnowledgeAssistant.Api/appsettings*.json`. The `Api:DisplayName` section differs in Development vs base config; override at runtime with environment variables (e.g. `Api__DisplayName=My Local API`). `DocumentStorage` controls upload path, max size, and allowed extensions (`DocumentStorage__MaxFileSizeBytes`). `Llm:Provider` and `Llm:Ollama` select the chat backend. Use user secrets or environment variables for secrets—never commit passwords or API keys.
 
 ## API overview (planned)
 
@@ -111,7 +121,7 @@ Application settings live under `src/Api/AIKnowledgeAssistant.Api/appsettings*.j
 | Info (sample) | `GET /api/info` (P1) |
 | Documents | `GET/POST/PUT/DELETE /api/documents` (P1) |
 | Auth | `POST /api/auth/login`, `GET /api/account/me` (P2) |
-| Chat | React shell now; RAG + SSE (P4–P5) |
+| Chat | `POST /api/chat` (P3); RAG + SSE (P4–P5) |
 
 ## RAG pipeline (summary)
 
@@ -130,6 +140,8 @@ Full rules: **[docs/development/ai-coding-guidelines.md](docs/development/ai-cod
 **P1-05 errors:** global `IExceptionHandler` + `traceId` on all ProblemDetails; see [docs/development/global-exception-handling.md](docs/development/global-exception-handling.md).
 
 **P1-06 async:** `GET /api/labs/async` — I/O-bound vs CPU-bound and cooperative cancellation; see [docs/development/async-cancellation.md](docs/development/async-cancellation.md).
+
+**P3-02 prompts:** `POST /api/labs/prompts/compare` — three prompt variants and recorded metrics; see [docs/development/prompt-lab.md](docs/development/prompt-lab.md).
 
 **P1-07 tests:** xUnit unit suite + `WebApplicationFactory` integration tests; see [docs/development/testing.md](docs/development/testing.md) and [ADR-002](docs/adr/ADR-002-test-strategy.md).
 

@@ -1,0 +1,35 @@
+{
+  "recordedAt": "2026-09-29",
+  "source": "Integration test stub (shape reference); replace assistantMessage values after a real Ollama run.",
+  "question": "Haftada kaç gün uzaktan çalışabilirim?",
+  "groundingContextUsed": "Şirket uzaktan çalışma politikası: haftada en fazla 2 gün; salı ve perşembe.",
+  "evaluationCriteria": [
+    "responseCharacterCount — kısıtlı prompt daha kısa mı?",
+    "durationMs — gecikme karşılaştırması",
+    "grounding — grounded varyant bağlam dışına çıkıyor mu?",
+    "constraintAdherence — constrained Türkçe ve ≤3 cümle mi?",
+    "hallucinationRisk — baseline uydurma eğilimi"
+  ],
+  "variants": [
+    {
+      "variant": "baseline",
+      "assistantMessage": "(run POST /api/labs/prompts/compare with Ollama)",
+      "responseCharacterCount": 0,
+      "durationMs": 0
+    },
+    {
+      "variant": "constrained",
+      "fewShotTurnCount": 2,
+      "assistantMessage": "(run POST /api/labs/prompts/compare with Ollama)",
+      "responseCharacterCount": 0,
+      "durationMs": 0
+    },
+    {
+      "variant": "grounded",
+      "assistantMessage": "(run POST /api/labs/prompts/compare with Ollama)",
+      "responseCharacterCount": 0,
+      "durationMs": 0
+    }
+  ],
+  "notes": "Grounded cevap '2 gün' ve salı/perşembe sınırını bağlamdan vermeli; baseline ek gün icat edebilir."
+}

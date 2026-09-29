@@ -1,4 +1,5 @@
 using AIKnowledgeAssistant.Application.Auth;
+using AIKnowledgeAssistant.Application.Chat;
 using AIKnowledgeAssistant.Domain.Documents;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -105,6 +106,10 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             InvalidCredentialsException => new ExceptionMapping(
                 StatusCodes.Status401Unauthorized,
                 "Unauthorized",
+                IsClientError: true),
+            AiChatProviderException => new ExceptionMapping(
+                StatusCodes.Status502BadGateway,
+                "Bad Gateway",
                 IsClientError: true),
             _ => new ExceptionMapping(
                 StatusCodes.Status500InternalServerError,
