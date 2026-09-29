@@ -13,15 +13,18 @@ public sealed class DocumentsController : ControllerBase
     private readonly IDocumentService _documentService;
     private readonly IDocumentInsightService _documentInsightService;
     private readonly IDocumentIngestionPipeline _ingestionPipeline;
+    private readonly IDocumentChunkService _documentChunks;
 
     public DocumentsController(
         IDocumentService documentService,
         IDocumentInsightService documentInsightService,
-        IDocumentIngestionPipeline ingestionPipeline)
+        IDocumentIngestionPipeline ingestionPipeline,
+        IDocumentChunkService documentChunks)
     {
         _documentService = documentService;
         _documentInsightService = documentInsightService;
         _ingestionPipeline = ingestionPipeline;
+        _documentChunks = documentChunks;
     }
 
     [HttpGet]
@@ -53,6 +56,15 @@ public sealed class DocumentsController : ControllerBase
     {
         var result = await _documentInsightService.ClassifyAsync(id, cancellationToken);
         return Ok(DocumentDtoMapping.ToDto(result));
+    }
+
+    [HttpGet("{id:guid}/chunks")]
+    [ProducesResponseType(typeof(IReadOnlyList<DocumentChunkDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IReadOnlyList<DocumentChunkDto>>> ListChunks(Guid id, CancellationToken cancellationToken)
+    {
+        var chunks = await _documentChunks.ListByDocumentIdAsync(id, cancellationToken);
+        return Ok(chunks.Select(DocumentDtoMapping.ToDto).ToList());
     }
 
     [HttpPost("{id:guid}/ingestion/run")]

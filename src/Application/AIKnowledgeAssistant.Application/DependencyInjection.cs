@@ -25,6 +25,10 @@ public static class DependencyInjection
         services.AddSingleton<IContextTruncationService, HeadTailContextTruncationService>();
         services.AddScoped<ITokenContextLabService, TokenContextLabService>();
         services.AddScoped<IDocumentIngestionPipeline, DocumentIngestionPipeline>();
+        services.AddSingleton<ITextChunker, DeterministicTextChunker>();
+        services.AddSingleton<ITextExtractor, PlainTextExtractor>();
+        services.AddScoped<IDocumentIngestionProcessor, DocumentTextIngestionProcessor>();
+        services.AddScoped<IDocumentChunkService, DocumentChunkService>();
         return services;
     }
 }

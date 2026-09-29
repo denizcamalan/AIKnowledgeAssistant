@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using AIKnowledgeAssistant.Application.Documents;
+using AIKnowledgeAssistant.Application.Ingestion;
 using AIKnowledgeAssistant.Domain.Documents;
 
 namespace AIKnowledgeAssistant.Api.Contracts.Documents;
@@ -9,6 +10,14 @@ public sealed record DocumentIngestionMetadataDto(
     string? FailureReason,
     DateTimeOffset? StartedAtUtc,
     DateTimeOffset? CompletedAtUtc);
+
+public sealed record DocumentChunkDto(
+    Guid Id,
+    Guid DocumentId,
+    int ChunkIndex,
+    string Text,
+    int StartOffset,
+    int EndOffset);
 
 public sealed record DocumentSummaryDto(
     Guid Id,
@@ -67,6 +76,9 @@ public static class DocumentDtoMapping
             ingestion.FailureReason,
             ingestion.StartedAtUtc,
             ingestion.CompletedAtUtc);
+
+    public static DocumentChunkDto ToDto(DocumentChunkResult chunk) =>
+        new(chunk.Id, chunk.DocumentId, chunk.ChunkIndex, chunk.Text, chunk.StartOffset, chunk.EndOffset);
 
     public static DocumentClassificationResponseDto ToDto(DocumentClassificationResult result) =>
         new()

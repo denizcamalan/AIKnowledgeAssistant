@@ -149,7 +149,9 @@ Full rules: **[docs/development/ai-coding-guidelines.md](docs/development/ai-cod
 
 **P4-01 SSE:** `POST /api/chat/stream` — `text/event-stream` (`started`, `delta`, `done`, `stopped`, `error`); stop via `POST /api/chat/stream/stop`. **P4-02:** React chat consumes the stream with fetch + Stop; see [docs/development/sse-chat-streaming.md](docs/development/sse-chat-streaming.md).
 
-**P5-01 ingestion pipeline:** `DocumentStatus` (`Uploaded` → `Processing` → `Ready` / `Failed`) + ingestion metadata; `POST /api/documents/{id}/ingestion/run` (stub processor); see [docs/development/document-ingestion-pipeline.md](docs/development/document-ingestion-pipeline.md).
+**P5-01 ingestion pipeline:** `DocumentStatus` (`Uploaded` → `Processing` → `Ready` / `Failed`) + ingestion metadata; `POST /api/documents/{id}/ingestion/run`; see [docs/development/document-ingestion-pipeline.md](docs/development/document-ingestion-pipeline.md).
+
+**P5-02 chunking:** TXT/MD extract + deterministic chunks with offsets; `GET /api/documents/{id}/chunks`; see [docs/development/text-chunking.md](docs/development/text-chunking.md).
 
 **P1-07 tests:** xUnit unit suite + `WebApplicationFactory` integration tests; see [docs/development/testing.md](docs/development/testing.md) and [ADR-002](docs/adr/ADR-002-test-strategy.md).
 

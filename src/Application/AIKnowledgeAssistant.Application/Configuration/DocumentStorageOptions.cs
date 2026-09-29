@@ -8,5 +8,5 @@ public sealed class DocumentStorageOptions
 
     public long MaxFileSizeBytes { get; set; } = 10 * 1024 * 1024;
 
-    public string[] AllowedExtensions { get; set; } = [".pdf", ".txt"];
+    public string[] AllowedExtensions { get; set; } = [".pdf", ".txt", ".md"];
 }

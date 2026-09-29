@@ -41,6 +41,14 @@ public sealed class DocumentIngestionEndpointsTests : IClassFixture<CustomWebApp
         Assert.Equal(1, ingested.Ingestion.AttemptCount);
         Assert.NotNull(ingested.Ingestion.StartedAtUtc);
         Assert.NotNull(ingested.Ingestion.CompletedAtUtc);
+
+        var chunksResponse = await _client.GetAsync($"/api/documents/{created.Id}/chunks");
+        Assert.Equal(HttpStatusCode.OK, chunksResponse.StatusCode);
+        var chunkList = await chunksResponse.Content.ReadFromJsonAsync<List<DocumentChunkDto>>();
+        Assert.NotNull(chunkList);
+        Assert.NotEmpty(chunkList);
+        Assert.Equal(0, chunkList[0].ChunkIndex);
+        Assert.True(chunkList[0].EndOffset > chunkList[0].StartOffset);
     }
 
     [PostgresFact]

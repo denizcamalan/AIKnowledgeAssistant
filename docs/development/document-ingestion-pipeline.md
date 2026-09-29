@@ -34,7 +34,7 @@ Upload still ends in `Uploaded`; ingestion is explicit until P7 async queue.
 
 ## Extension point
 
-`IDocumentIngestionProcessor` in Application; Infrastructure registers `PlaceholderDocumentIngestionProcessor` (no-op). P5-02 replaces it with extract/chunk steps while keeping the same state machine.
+`IDocumentIngestionProcessor` runs **text extract + chunk** for `.txt`/`.md` (see [text-chunking.md](text-chunking.md)). PDF fails until a dedicated extractor lands.
 
 ## Interview notes
 
@@ -44,4 +44,4 @@ Upload still ends in `Uploaded`; ingestion is explicit until P7 async queue.
 ## Related
 
 - [architecture/overview.md](../architecture/overview.md) — Ingestion module
-- P5-02 text extraction and chunking (next)
+- P5-02 text extraction and chunking — [text-chunking.md](text-chunking.md)
