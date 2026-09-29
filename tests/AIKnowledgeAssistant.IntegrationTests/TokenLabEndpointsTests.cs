@@ -91,5 +91,10 @@ public sealed class TokenLabEndpointsTests : IClassFixture<CustomWebApplicationF
                 new TokenUsage(call * 300, 15, call * 250, 15),
                 ProviderDurationMs: call * 5));
         }
+
+        public IAsyncEnumerable<ChatStreamChunk> StreamAsync(
+            ChatCompletionRequest request,
+            CancellationToken cancellationToken) =>
+            this.StreamFromCompleteAsync(request, cancellationToken);
     }
 }

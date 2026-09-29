@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using AIKnowledgeAssistant.Api.Contracts.Auth;
 using AIKnowledgeAssistant.Api.Contracts.Chat;
+using System.Runtime.CompilerServices;
 using AIKnowledgeAssistant.Application.Chat;
 using AIKnowledgeAssistant.Application.Chat.Tokens;
 using AIKnowledgeAssistant.Application.Configuration;
@@ -83,5 +84,29 @@ public sealed class ChatEndpointsTests : IClassFixture<CustomWebApplicationFacto
                 "stub-model",
                 LlmProviders.Ollama,
                 new TokenUsage(50, 10, 20, 10)));
+
+        public IAsyncEnumerable<ChatStreamChunk> StreamAsync(
+            ChatCompletionRequest request,
+            CancellationToken cancellationToken) =>
+            this.StreamFromCompleteAsync(request, cancellationToken);
+    }
+}
+
+internal static class IntegrationStubChatExtensions
+{
+    public static async IAsyncEnumerable<ChatStreamChunk> StreamFromCompleteAsync(
+        this IAiChatCompletionClient client,
+        ChatCompletionRequest request,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        var result = await client.CompleteAsync(request, cancellationToken);
+        yield return new ChatStreamChunk(result.Content, IsFinal: false);
+        yield return new ChatStreamChunk(
+            string.Empty,
+            IsFinal: true,
+            result.Model,
+            result.Provider,
+            result.TokenUsage,
+            result.ProviderDurationMs);
     }
 }

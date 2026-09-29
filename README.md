@@ -121,7 +121,7 @@ Application settings live under `src/Api/AIKnowledgeAssistant.Api/appsettings*.j
 | Info (sample) | `GET /api/info` (P1) |
 | Documents | `GET/POST/PUT/DELETE /api/documents` (P1) |
 | Auth | `POST /api/auth/login`, `GET /api/account/me` (P2) |
-| Chat | `POST /api/chat` (P3); RAG + SSE (P4–P5) |
+| Chat | `POST /api/chat`, `POST /api/chat/stream` (SSE, P4); RAG citations (P5) |
 
 ## RAG pipeline (summary)
 
@@ -146,6 +146,8 @@ Full rules: **[docs/development/ai-coding-guidelines.md](docs/development/ai-cod
 **P3-03 tokens:** `POST /api/labs/tokens/context-experiment` — short vs long context, truncation, token logging; see [docs/development/token-context-lab.md](docs/development/token-context-lab.md).
 
 **P3-04 structured output:** `POST /api/documents/{id}/classify` — JSON schema validation, retry, fallback; see [docs/development/structured-output.md](docs/development/structured-output.md).
+
+**P4-01 SSE:** `POST /api/chat/stream` — `text/event-stream` deltas + disconnect cancellation; see [docs/development/sse-chat-streaming.md](docs/development/sse-chat-streaming.md).
 
 **P1-07 tests:** xUnit unit suite + `WebApplicationFactory` integration tests; see [docs/development/testing.md](docs/development/testing.md) and [ADR-002](docs/adr/ADR-002-test-strategy.md).
 

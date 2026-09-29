@@ -3,6 +3,10 @@ namespace AIKnowledgeAssistant.Application.Chat;
 public interface IAiChatCompletionClient
 {
     Task<ChatCompletionResult> CompleteAsync(ChatCompletionRequest request, CancellationToken cancellationToken);
+
+    IAsyncEnumerable<ChatStreamChunk> StreamAsync(
+        ChatCompletionRequest request,
+        CancellationToken cancellationToken);
 }
 
 public sealed record ChatCompletionRequest(

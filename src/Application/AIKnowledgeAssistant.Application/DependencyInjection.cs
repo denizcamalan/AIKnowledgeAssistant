@@ -17,6 +17,7 @@ public static class DependencyInjection
         services.AddSingleton<IStructuredLlmJsonParser, StructuredLlmJsonParser>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IAiChatService, ChatService>();
+        services.AddScoped<IChatStreamService, ChatStreamService>();
         services.AddScoped<IPromptLabService, PromptLabService>();
         services.AddSingleton<ITokenEstimator, HeuristicTokenEstimator>();
         services.AddSingleton<IContextTruncationService, HeadTailContextTruncationService>();

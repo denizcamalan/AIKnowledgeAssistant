@@ -92,5 +92,10 @@ public sealed class PromptLabEndpointsTests : IClassFixture<CustomWebApplication
                 LlmProviders.Ollama,
                 new TokenUsage(call * 100, call * 10, call * 80, call * 8)));
         }
+
+        public IAsyncEnumerable<ChatStreamChunk> StreamAsync(
+            ChatCompletionRequest request,
+            CancellationToken cancellationToken) =>
+            this.StreamFromCompleteAsync(request, cancellationToken);
     }
 }

@@ -53,5 +53,10 @@ public sealed class ChatServiceTests
                 provider,
                 new TokenUsage(12, 3, 5, 3)));
         }
+
+        public IAsyncEnumerable<ChatStreamChunk> StreamAsync(
+            ChatCompletionRequest request,
+            CancellationToken cancellationToken) =>
+            this.StreamFromCompleteAsync(request, cancellationToken);
     }
 }

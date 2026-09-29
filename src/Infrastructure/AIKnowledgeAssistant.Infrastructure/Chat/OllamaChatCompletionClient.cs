@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using AIKnowledgeAssistant.Application.Chat;
 using AIKnowledgeAssistant.Application.Chat.Tokens;
@@ -29,9 +31,7 @@ public sealed class OllamaChatCompletionClient : IAiChatCompletionClient
             Model = model,
             Stream = false,
             Format = request.RequestJsonFormat ? "json" : null,
-            Messages = request.Messages
-                .Select(message => new OllamaChatMessage { Role = message.Role, Content = message.Content })
-                .ToList(),
+            Messages = ToOllamaMessages(request.Messages),
         };
 
         HttpResponseMessage response;
@@ -50,6 +50,98 @@ public sealed class OllamaChatCompletionClient : IAiChatCompletionClient
             throw new AiChatProviderException("The Ollama request timed out.", exception);
         }
 
+        using (response)
+        {
+            await EnsureSuccessOrThrowAsync(response, model, cancellationToken);
+
+            var ollamaResponse = await response.Content.ReadFromJsonAsync<OllamaChatResponse>(cancellationToken);
+            var content = ollamaResponse?.Message?.Content;
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                throw new AiChatProviderException("Ollama returned an empty assistant message.");
+            }
+
+            var usage = BuildTokenUsage(ollamaResponse, request, content.Trim());
+            var durationMs = ToDurationMs(ollamaResponse?.TotalDurationNanoseconds);
+
+            return new ChatCompletionResult(content.Trim(), model, LlmProviders.Ollama, usage, durationMs);
+        }
+    }
+
+    public async IAsyncEnumerable<ChatStreamChunk> StreamAsync(
+        ChatCompletionRequest request,
+        [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        if (request.RequestJsonFormat)
+        {
+            throw new AiChatProviderException("Streaming is not supported together with JSON response format.");
+        }
+
+        var model = string.IsNullOrWhiteSpace(request.Model) ? _options.Model : request.Model;
+        var payload = new OllamaChatRequest
+        {
+            Model = model,
+            Stream = true,
+            Messages = ToOllamaMessages(request.Messages),
+        };
+
+        HttpResponseMessage response;
+        try
+        {
+            using var httpRequest = new HttpRequestMessage(HttpMethod.Post, "api/chat")
+            {
+                Content = JsonContent.Create(payload),
+            };
+            response = await _httpClient.SendAsync(
+                httpRequest,
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken);
+        }
+        catch (HttpRequestException exception)
+        {
+            throw new AiChatProviderException(
+                "Could not reach the Ollama server. Ensure Ollama is running and Llm:Ollama:BaseUrl is correct.",
+                exception);
+        }
+        catch (TaskCanceledException exception) when (!cancellationToken.IsCancellationRequested)
+        {
+            throw new AiChatProviderException("The Ollama request timed out.", exception);
+        }
+
+        using (response)
+        {
+            await EnsureSuccessOrThrowAsync(response, model, cancellationToken);
+
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            using var reader = new StreamReader(stream);
+
+            while (true)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var line = await reader.ReadLineAsync(cancellationToken);
+                if (line is null)
+                {
+                    break;
+                }
+
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+
+                foreach (var chunk in OllamaStreamLineParser.ParseLine(line, model))
+                {
+                    yield return chunk;
+                }
+            }
+        }
+    }
+
+    private async Task EnsureSuccessOrThrowAsync(
+        HttpResponseMessage response,
+        string model,
+        CancellationToken cancellationToken)
+    {
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
             throw new AiChatProviderException(
@@ -62,20 +154,6 @@ public sealed class OllamaChatCompletionClient : IAiChatCompletionClient
             throw new AiChatProviderException(
                 $"Ollama returned {(int)response.StatusCode}: {TrimForDetail(body)}");
         }
-
-        var ollamaResponse = await response.Content.ReadFromJsonAsync<OllamaChatResponse>(cancellationToken);
-        var content = ollamaResponse?.Message?.Content;
-        if (string.IsNullOrWhiteSpace(content))
-        {
-            throw new AiChatProviderException("Ollama returned an empty assistant message.");
-        }
-
-        var usage = BuildTokenUsage(ollamaResponse, request, content.Trim());
-        var durationMs = ollamaResponse?.TotalDurationNanoseconds is long nanos
-            ? nanos / 1_000_000
-            : (long?)null;
-
-        return new ChatCompletionResult(content.Trim(), model, LlmProviders.Ollama, usage, durationMs);
     }
 
     private static TokenUsage BuildTokenUsage(
@@ -93,6 +171,14 @@ public sealed class OllamaChatCompletionClient : IAiChatCompletionClient
             promptEstimate,
             estimator.Estimate(completionText));
     }
+
+    private static long? ToDurationMs(long? nanoseconds) =>
+        nanoseconds is long value ? value / 1_000_000 : null;
+
+    private static IReadOnlyList<OllamaChatMessage> ToOllamaMessages(IReadOnlyList<ChatMessage> messages) =>
+        messages
+            .Select(message => new OllamaChatMessage { Role = message.Role, Content = message.Content })
+            .ToList();
 
     private static string TrimForDetail(string value) =>
         value.Length <= 500 ? value : value[..500];
