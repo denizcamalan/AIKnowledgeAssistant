@@ -31,7 +31,7 @@ public sealed class ChatService : IAiChatService
         var estimatedPromptTokens = _tokenEstimator.Estimate(SerializeForEstimate(messages));
 
         var completion = await client.CompleteAsync(
-            new ChatCompletionRequest(messages, Model: string.Empty),
+            new ChatCompletionRequest(messages, Model: string.Empty, prompt.RequestJsonFormat),
             cancellationToken);
 
         _logger.LogInformation(

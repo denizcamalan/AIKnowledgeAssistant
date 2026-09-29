@@ -44,4 +44,33 @@ public static class DocumentDtoMapping
             result.SizeBytes,
             result.CreatedAtUtc,
             result.UpdatedAtUtc);
+
+    public static DocumentClassificationResponseDto ToDto(DocumentClassificationResult result) =>
+        new()
+        {
+            DocumentId = result.DocumentId,
+            Summary = result.Classification.Summary,
+            Category = result.Classification.Category,
+            Keywords = result.Classification.Keywords.ToList(),
+            Confidence = result.Classification.Confidence,
+            UsedFallback = result.UsedFallback,
+            AttemptCount = result.AttemptCount,
+        };
+}
+
+public sealed class DocumentClassificationResponseDto
+{
+    public Guid DocumentId { get; init; }
+
+    public required string Summary { get; init; }
+
+    public required string Category { get; init; }
+
+    public required IReadOnlyList<string> Keywords { get; init; }
+
+    public double Confidence { get; init; }
+
+    public bool UsedFallback { get; init; }
+
+    public int AttemptCount { get; init; }
 }

@@ -8,7 +8,8 @@ public interface IAiChatService
 public sealed record ChatPrompt(
     string Message,
     string? SystemMessage = null,
-    IReadOnlyList<ChatMessage>? FewShotExamples = null);
+    IReadOnlyList<ChatMessage>? FewShotExamples = null,
+    bool RequestJsonFormat = false);
 
 public sealed record ChatReply(
     string Content,

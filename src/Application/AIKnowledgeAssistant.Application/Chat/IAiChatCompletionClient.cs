@@ -7,7 +7,8 @@ public interface IAiChatCompletionClient
 
 public sealed record ChatCompletionRequest(
     IReadOnlyList<ChatMessage> Messages,
-    string Model);
+    string Model,
+    bool RequestJsonFormat = false);
 
 public sealed record ChatMessage(string Role, string Content);
 

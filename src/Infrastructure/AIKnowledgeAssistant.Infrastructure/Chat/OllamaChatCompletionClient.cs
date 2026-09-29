@@ -28,6 +28,7 @@ public sealed class OllamaChatCompletionClient : IAiChatCompletionClient
         {
             Model = model,
             Stream = false,
+            Format = request.RequestJsonFormat ? "json" : null,
             Messages = request.Messages
                 .Select(message => new OllamaChatMessage { Role = message.Role, Content = message.Content })
                 .ToList(),
@@ -103,6 +104,9 @@ public sealed class OllamaChatCompletionClient : IAiChatCompletionClient
 
         [JsonPropertyName("stream")]
         public bool Stream { get; init; }
+
+        [JsonPropertyName("format")]
+        public string? Format { get; init; }
 
         [JsonPropertyName("messages")]
         public required IReadOnlyList<OllamaChatMessage> Messages { get; init; }

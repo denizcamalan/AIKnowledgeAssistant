@@ -24,6 +24,8 @@ public sealed class LlmOptions
 
     /// <summary>USD per 1K input tokens for cost illustration (0 for local Ollama).</summary>
     public decimal EstimatedCostPer1KInputTokens { get; set; }
+
+    public int StructuredOutputMaxAttempts { get; set; } = 3;
 }
 
 public sealed class OllamaOptions

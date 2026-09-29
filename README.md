@@ -145,6 +145,8 @@ Full rules: **[docs/development/ai-coding-guidelines.md](docs/development/ai-cod
 
 **P3-03 tokens:** `POST /api/labs/tokens/context-experiment` — short vs long context, truncation, token logging; see [docs/development/token-context-lab.md](docs/development/token-context-lab.md).
 
+**P3-04 structured output:** `POST /api/documents/{id}/classify` — JSON schema validation, retry, fallback; see [docs/development/structured-output.md](docs/development/structured-output.md).
+
 **P1-07 tests:** xUnit unit suite + `WebApplicationFactory` integration tests; see [docs/development/testing.md](docs/development/testing.md) and [ADR-002](docs/adr/ADR-002-test-strategy.md).
 
 **P2-01 JWT:** `POST /api/auth/login`, protected `GET /api/account/me`; see [docs/development/jwt-authentication.md](docs/development/jwt-authentication.md).

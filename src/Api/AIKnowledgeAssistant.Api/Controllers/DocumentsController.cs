@@ -1,5 +1,6 @@
 using AIKnowledgeAssistant.Api.Contracts.Documents;
 using AIKnowledgeAssistant.Application.Documents;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AIKnowledgeAssistant.Api.Controllers;
@@ -9,8 +10,15 @@ namespace AIKnowledgeAssistant.Api.Controllers;
 public sealed class DocumentsController : ControllerBase
 {
     private readonly IDocumentService _documentService;
+    private readonly IDocumentInsightService _documentInsightService;
 
-    public DocumentsController(IDocumentService documentService) => _documentService = documentService;
+    public DocumentsController(
+        IDocumentService documentService,
+        IDocumentInsightService documentInsightService)
+    {
+        _documentService = documentService;
+        _documentInsightService = documentInsightService;
+    }
 
     [HttpGet]
     [ProducesResponseType(typeof(IReadOnlyList<DocumentSummaryDto>), StatusCodes.Status200OK)]
@@ -27,6 +35,20 @@ public sealed class DocumentsController : ControllerBase
     {
         var document = await _documentService.GetByIdAsync(id, cancellationToken);
         return Ok(DocumentDtoMapping.ToDto(document));
+    }
+
+    [HttpPost("{id:guid}/classify")]
+    [Authorize]
+    [ProducesResponseType(typeof(DocumentClassificationResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status502BadGateway)]
+    public async Task<ActionResult<DocumentClassificationResponseDto>> Classify(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        var result = await _documentInsightService.ClassifyAsync(id, cancellationToken);
+        return Ok(DocumentDtoMapping.ToDto(result));
     }
 
     [HttpPost]

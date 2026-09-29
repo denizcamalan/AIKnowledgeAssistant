@@ -64,4 +64,23 @@ internal sealed class LocalFileStorage : IFileStorage
 
         return Task.CompletedTask;
     }
+
+    public Task<Stream> OpenReadAsync(string storagePath, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var absolutePath = Path.Combine(_rootPath, storagePath.Replace('/', Path.DirectorySeparatorChar));
+        if (!File.Exists(absolutePath))
+        {
+            throw new FileNotFoundException("Document file was not found on disk.", absolutePath);
+        }
+
+        Stream stream = new FileStream(
+            absolutePath,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.Read,
+            bufferSize: 4096,
+            useAsync: true);
+        return Task.FromResult(stream);
+    }
 }
