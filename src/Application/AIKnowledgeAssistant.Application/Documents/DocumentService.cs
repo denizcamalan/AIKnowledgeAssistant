@@ -52,7 +52,7 @@ public sealed class DocumentService : IDocumentService
 
         await _repository.AddAsync(document, cancellationToken);
 
-        return ToDetail(document);
+        return DocumentMapping.ToDetail(document);
     }
 
     public async Task<IReadOnlyList<DocumentSummaryResult>> ListAsync(CancellationToken cancellationToken)
@@ -60,7 +60,7 @@ public sealed class DocumentService : IDocumentService
         var documents = await _repository.ListAsync(cancellationToken);
         return documents
             .OrderByDescending(d => d.CreatedAtUtc)
-            .Select(ToSummary)
+            .Select(DocumentMapping.ToSummary)
             .ToList();
     }
 
@@ -72,7 +72,7 @@ public sealed class DocumentService : IDocumentService
             throw new DocumentNotFoundException(id);
         }
 
-        return ToDetail(document);
+        return DocumentMapping.ToDetail(document);
     }
 
     public async Task<DocumentDetailResult> UpdateAsync(Guid id, string displayName, CancellationToken cancellationToken)
@@ -93,7 +93,7 @@ public sealed class DocumentService : IDocumentService
 
         await _repository.UpdateAsync(document, cancellationToken);
 
-        return ToDetail(document);
+        return DocumentMapping.ToDetail(document);
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
@@ -142,24 +142,4 @@ public sealed class DocumentService : IDocumentService
                 nameof(originalFileName));
         }
     }
-
-    private static DocumentSummaryResult ToSummary(Document document) =>
-        new(
-            document.Id,
-            document.DisplayName,
-            document.OriginalFileName,
-            document.Status,
-            document.SizeBytes,
-            document.CreatedAtUtc);
-
-    private static DocumentDetailResult ToDetail(Document document) =>
-        new(
-            document.Id,
-            document.DisplayName,
-            document.OriginalFileName,
-            document.ContentType,
-            document.Status,
-            document.SizeBytes,
-            document.CreatedAtUtc,
-            document.UpdatedAtUtc);
 }

@@ -62,7 +62,18 @@ export function DocumentsScreen() {
 }
 
 function formatStatus(status: number): string {
-  return status === 0 ? "Uploaded" : `Status ${status}`;
+  switch (status) {
+    case 0:
+      return "Uploaded";
+    case 1:
+      return "Processing";
+    case 2:
+      return "Ready";
+    case 3:
+      return "Failed";
+    default:
+      return `Status ${status}`;
+  }
 }
 
 function formatBytes(size: number): string {

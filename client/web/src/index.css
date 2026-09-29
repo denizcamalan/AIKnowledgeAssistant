@@ -196,6 +196,34 @@ label {
   background: #f3efe6;
 }
 
+.bubble.error {
+  background: #fdecea;
+  color: #8a2a2a;
+}
+
+.secondary-button {
+  background: transparent;
+  border: 1px solid #c4b8a8;
+  color: #3d3629;
+  padding: 0.45rem 0.85rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.secondary-button:hover {
+  background: #f3efe6;
+}
+
+.streaming-cursor {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+
 .composer {
   display: flex;
   gap: 0.5rem;

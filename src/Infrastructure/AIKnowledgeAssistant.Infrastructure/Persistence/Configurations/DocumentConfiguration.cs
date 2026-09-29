@@ -33,6 +33,25 @@ internal sealed class DocumentConfiguration : IEntityTypeConfiguration<Document>
             .HasMaxLength(32)
             .IsRequired();
 
+        builder.OwnsOne(
+            d => d.Ingestion,
+            ingestion =>
+            {
+                ingestion.Property(i => i.AttemptCount)
+                    .HasColumnName("ingestion_attempt_count")
+                    .HasDefaultValue(0);
+
+                ingestion.Property(i => i.FailureReason)
+                    .HasColumnName("ingestion_failure_reason")
+                    .HasMaxLength(2000);
+
+                ingestion.Property(i => i.StartedAtUtc)
+                    .HasColumnName("ingestion_started_at_utc");
+
+                ingestion.Property(i => i.CompletedAtUtc)
+                    .HasColumnName("ingestion_completed_at_utc");
+            });
+
         builder.HasIndex(d => d.OriginalFileName)
             .IsUnique();
 

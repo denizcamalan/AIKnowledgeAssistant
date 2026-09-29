@@ -11,6 +11,13 @@ export type LoginResponse = {
   user: UserProfile;
 };
 
+export type DocumentIngestionMetadata = {
+  attemptCount: number;
+  failureReason?: string | null;
+  startedAtUtc?: string | null;
+  completedAtUtc?: string | null;
+};
+
 export type DocumentSummary = {
   id: string;
   displayName: string;
@@ -18,6 +25,7 @@ export type DocumentSummary = {
   status: number;
   sizeBytes: number;
   createdAtUtc: string;
+  ingestion: DocumentIngestionMetadata;
 };
 
 export type ProblemDetailsBody = {

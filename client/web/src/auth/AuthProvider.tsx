@@ -8,6 +8,7 @@ type AuthContextValue = {
   ready: boolean;
   sessionWarning: string | null;
   api: ApiClient;
+  getAccessToken: () => string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
 };
@@ -79,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       ready,
       sessionWarning,
       api,
+      getAccessToken: () => tokenRef.current,
       async login(email, password) {
         const result = await api.login(email, password);
         tokenRef.current = result.accessToken;

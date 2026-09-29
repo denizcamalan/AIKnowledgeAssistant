@@ -45,6 +45,7 @@ public sealed class ChatStreamEndpointsTests : IClassFixture<CustomWebApplicatio
         var body = await response.Content.ReadAsStringAsync();
         Assert.Contains("event: delta", body, StringComparison.Ordinal);
         Assert.Contains("event: done", body, StringComparison.Ordinal);
+        Assert.Contains("event: started", body, StringComparison.Ordinal);
         Assert.Contains("Hello", body, StringComparison.Ordinal);
     }
 

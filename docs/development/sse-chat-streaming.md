@@ -1,4 +1,4 @@
-# SSE chat streaming (P4-01)
+# SSE chat streaming (P4-01 / P4-02)
 
 Stream LLM answers to the browser with **Server-Sent Events** instead of waiting for one JSON body.
 
@@ -12,8 +12,10 @@ Response: `text/event-stream`
 
 | Event | Payload | Meaning |
 |-------|---------|---------|
+| `started` | `{ "streamId": "..." }` | Server registered this stream; use id for stop |
 | `delta` | `{ "text": "..." }` | Next token/chunk of assistant text |
-| `done` | `{ "model", "provider", "promptTokens", "completionTokens", "providerDurationMs" }` | Stream finished |
+| `done` | `{ "streamId", "model", "provider", ... }` | Stream finished normally |
+| `stopped` | `{ "streamId", "reason": "stop-request" }` | Cancelled via `POST /api/chat/stream/stop` |
 | `error` | `{ "message": "..." }` | Provider failure (before connection closes) |
 
 Example:
@@ -31,7 +33,21 @@ data: {"model":"qwen3:4b","provider":"Ollama","promptTokens":12,"completionToken
 
 ## Cancellation
 
-The action links `HttpContext.RequestAborted` with the request token. When the client disconnects, the Ollama NDJSON read loop stops via `CancellationToken`.
+Two paths share one linked `CancellationToken`:
+
+1. **Client disconnect** — `HttpContext.RequestAborted`; no `stopped` event (connection is gone).
+2. **Explicit stop** — `POST /api/chat/stream/stop` with `{ "streamId": "..." }` (same JWT user as the stream). Returns `204` or `404`. Emits `stopped` on the open SSE response.
+
+The React chat UI uses **fetch + ReadableStream** (not `EventSource`) so it can send JWT on `POST` and call stop while the stream is open. See `client/web/src/api/chatStream.ts` and `ChatScreen.tsx`.
+
+## Stop curl
+
+```bash
+curl -X POST http://localhost:5149/api/chat/stream/stop \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{"streamId":"YOUR-STREAM-ID"}'
+```
 
 ## curl (requires `-N` to disable buffering)
 
@@ -55,4 +71,4 @@ Chat completion streaming is a common SSE fit.
 ## Related
 
 - [llm-ollama.md](llm-ollama.md) — non-streaming `/api/chat`
-- React client wiring — follow-up task (P4 UI)
+- P4-02 React chat screen — streaming transcript + Stop button

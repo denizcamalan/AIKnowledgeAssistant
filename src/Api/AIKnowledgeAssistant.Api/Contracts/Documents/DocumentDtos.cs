@@ -4,13 +4,20 @@ using AIKnowledgeAssistant.Domain.Documents;
 
 namespace AIKnowledgeAssistant.Api.Contracts.Documents;
 
+public sealed record DocumentIngestionMetadataDto(
+    int AttemptCount,
+    string? FailureReason,
+    DateTimeOffset? StartedAtUtc,
+    DateTimeOffset? CompletedAtUtc);
+
 public sealed record DocumentSummaryDto(
     Guid Id,
     string DisplayName,
     string OriginalFileName,
     DocumentStatus Status,
     long SizeBytes,
-    DateTimeOffset CreatedAtUtc);
+    DateTimeOffset CreatedAtUtc,
+    DocumentIngestionMetadataDto Ingestion);
 
 public sealed record DocumentDetailDto(
     Guid Id,
@@ -20,7 +27,8 @@ public sealed record DocumentDetailDto(
     DocumentStatus Status,
     long SizeBytes,
     DateTimeOffset CreatedAtUtc,
-    DateTimeOffset UpdatedAtUtc);
+    DateTimeOffset UpdatedAtUtc,
+    DocumentIngestionMetadataDto Ingestion);
 
 public sealed class UpdateDocumentRequest
 {
@@ -32,7 +40,14 @@ public sealed class UpdateDocumentRequest
 public static class DocumentDtoMapping
 {
     public static DocumentSummaryDto ToDto(DocumentSummaryResult result) =>
-        new(result.Id, result.DisplayName, result.OriginalFileName, result.Status, result.SizeBytes, result.CreatedAtUtc);
+        new(
+            result.Id,
+            result.DisplayName,
+            result.OriginalFileName,
+            result.Status,
+            result.SizeBytes,
+            result.CreatedAtUtc,
+            ToDto(result.Ingestion));
 
     public static DocumentDetailDto ToDto(DocumentDetailResult result) =>
         new(
@@ -43,7 +58,15 @@ public static class DocumentDtoMapping
             result.Status,
             result.SizeBytes,
             result.CreatedAtUtc,
-            result.UpdatedAtUtc);
+            result.UpdatedAtUtc,
+            ToDto(result.Ingestion));
+
+    private static DocumentIngestionMetadataDto ToDto(DocumentIngestionMetadataResult ingestion) =>
+        new(
+            ingestion.AttemptCount,
+            ingestion.FailureReason,
+            ingestion.StartedAtUtc,
+            ingestion.CompletedAtUtc);
 
     public static DocumentClassificationResponseDto ToDto(DocumentClassificationResult result) =>
         new()

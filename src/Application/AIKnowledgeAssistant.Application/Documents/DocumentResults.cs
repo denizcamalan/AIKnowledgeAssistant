@@ -2,13 +2,20 @@ using AIKnowledgeAssistant.Domain.Documents;
 
 namespace AIKnowledgeAssistant.Application.Documents;
 
+public sealed record DocumentIngestionMetadataResult(
+    int AttemptCount,
+    string? FailureReason,
+    DateTimeOffset? StartedAtUtc,
+    DateTimeOffset? CompletedAtUtc);
+
 public sealed record DocumentSummaryResult(
     Guid Id,
     string DisplayName,
     string OriginalFileName,
     DocumentStatus Status,
     long SizeBytes,
-    DateTimeOffset CreatedAtUtc);
+    DateTimeOffset CreatedAtUtc,
+    DocumentIngestionMetadataResult Ingestion);
 
 public sealed record DocumentDetailResult(
     Guid Id,
@@ -18,4 +25,5 @@ public sealed record DocumentDetailResult(
     DocumentStatus Status,
     long SizeBytes,
     DateTimeOffset CreatedAtUtc,
-    DateTimeOffset UpdatedAtUtc);
+    DateTimeOffset UpdatedAtUtc,
+    DocumentIngestionMetadataResult Ingestion);

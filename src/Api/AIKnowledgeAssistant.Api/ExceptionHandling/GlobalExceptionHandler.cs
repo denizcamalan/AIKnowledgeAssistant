@@ -99,6 +99,10 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
                 StatusCodes.Status409Conflict,
                 "Conflict",
                 IsClientError: true),
+            InvalidDocumentIngestionTransitionException => new ExceptionMapping(
+                StatusCodes.Status409Conflict,
+                "Conflict",
+                IsClientError: true),
             ArgumentException => new ExceptionMapping(
                 StatusCodes.Status400BadRequest,
                 "Bad Request",

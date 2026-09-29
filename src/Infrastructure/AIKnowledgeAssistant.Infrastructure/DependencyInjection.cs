@@ -6,6 +6,8 @@ using AIKnowledgeAssistant.Infrastructure.Auth;
 using AIKnowledgeAssistant.Infrastructure.Chat;
 using AIKnowledgeAssistant.Infrastructure.Documents;
 using AIKnowledgeAssistant.Infrastructure.Persistence;
+using AIKnowledgeAssistant.Application.Ingestion;
+using AIKnowledgeAssistant.Infrastructure.Ingestion;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +35,7 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
         services.AddScoped<IDocumentRepository, EfDocumentRepository>();
         services.AddSingleton<IFileStorage, LocalFileStorage>();
+        services.AddScoped<IDocumentIngestionProcessor, PlaceholderDocumentIngestionProcessor>();
 
         return services;
     }

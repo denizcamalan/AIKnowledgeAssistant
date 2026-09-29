@@ -11,6 +11,12 @@ public sealed class ChatRequestDto
     public string? SystemMessage { get; set; }
 }
 
+public sealed class ChatStreamStopRequestDto
+{
+    [Required]
+    public Guid StreamId { get; set; }
+}
+
 public sealed class ChatResponseDto
 {
     public required string Message { get; set; }

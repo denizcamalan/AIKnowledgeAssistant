@@ -16,6 +16,8 @@ public sealed class Document
 
     public DocumentStatus Status { get; set; }
 
+    public DocumentIngestionState Ingestion { get; set; } = new();
+
     public DateTimeOffset CreatedAtUtc { get; set; }
 
     public DateTimeOffset UpdatedAtUtc { get; set; }

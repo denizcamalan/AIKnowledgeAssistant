@@ -1,3 +1,5 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using AIKnowledgeAssistant.Api.Contracts.Chat;
 using AIKnowledgeAssistant.Api.Sse;
 using AIKnowledgeAssistant.Application.Chat;
@@ -13,11 +15,16 @@ public sealed class ChatController : ControllerBase
 {
     private readonly IAiChatService _chatService;
     private readonly IChatStreamService _chatStreamService;
+    private readonly IChatStreamSessionRegistry _streamSessions;
 
-    public ChatController(IAiChatService chatService, IChatStreamService chatStreamService)
+    public ChatController(
+        IAiChatService chatService,
+        IChatStreamService chatStreamService,
+        IChatStreamSessionRegistry streamSessions)
     {
         _chatService = chatService;
         _chatStreamService = chatStreamService;
+        _streamSessions = streamSessions;
     }
 
     [HttpPost]
@@ -61,16 +68,31 @@ public sealed class ChatController : ControllerBase
             return;
         }
 
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            Response.StatusCode = StatusCodes.Status401Unauthorized;
+            return;
+        }
+
         Response.ContentType = "text/event-stream";
         Response.Headers.CacheControl = "no-cache";
         Response.Headers.Connection = "keep-alive";
 
+        using var session = _streamSessions.StartSession(userId);
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
             cancellationToken,
-            HttpContext.RequestAborted);
+            HttpContext.RequestAborted,
+            session.Token);
 
         try
         {
+            await SseResponseWriter.WriteEventAsync(
+                Response,
+                "started",
+                new { streamId = session.StreamId },
+                linkedCts.Token);
+
             await foreach (var chunk in _chatStreamService.StreamAsync(
                                new ChatPrompt(request.Message, request.SystemMessage),
                                linkedCts.Token))
@@ -91,6 +113,7 @@ public sealed class ChatController : ControllerBase
                         "done",
                         new
                         {
+                            streamId = session.StreamId,
                             model = chunk.Model,
                             provider = chunk.Provider,
                             promptTokens = chunk.TokenUsage?.PromptTokens,
@@ -101,9 +124,16 @@ public sealed class ChatController : ControllerBase
                 }
             }
         }
-        catch (OperationCanceledException) when (HttpContext.RequestAborted.IsCancellationRequested)
+        catch (OperationCanceledException) when (session.Token.IsCancellationRequested)
         {
-            // Client disconnected; upstream cancellation is expected.
+            if (!HttpContext.RequestAborted.IsCancellationRequested)
+            {
+                await SseResponseWriter.WriteEventAsync(
+                    Response,
+                    "stopped",
+                    new { streamId = session.StreamId, reason = "stop-request" },
+                    CancellationToken.None);
+            }
         }
         catch (AiChatProviderException exception)
         {
@@ -112,9 +142,39 @@ public sealed class ChatController : ControllerBase
                 await SseResponseWriter.WriteEventAsync(
                     Response,
                     "error",
-                    new { message = exception.Message },
+                    new { streamId = session.StreamId, message = exception.Message },
                     CancellationToken.None);
             }
         }
+        finally
+        {
+            _streamSessions.CompleteSession(session.StreamId);
+        }
     }
+
+    [HttpPost("stream/stop")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public IActionResult StopStream([FromBody] ChatStreamStopRequestDto request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return ValidationProblem(ModelState);
+        }
+
+        var userId = GetCurrentUserId();
+        if (userId is null)
+        {
+            return Unauthorized();
+        }
+
+        return _streamSessions.TryStopSession(userId, request.StreamId)
+            ? NoContent()
+            : NotFound();
+    }
+
+    private string? GetCurrentUserId() =>
+        User.FindFirstValue(ClaimTypes.NameIdentifier)
+        ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
 }

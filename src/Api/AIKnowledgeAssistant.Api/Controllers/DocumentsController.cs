@@ -1,5 +1,6 @@
 using AIKnowledgeAssistant.Api.Contracts.Documents;
 using AIKnowledgeAssistant.Application.Documents;
+using AIKnowledgeAssistant.Application.Ingestion;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,13 +12,16 @@ public sealed class DocumentsController : ControllerBase
 {
     private readonly IDocumentService _documentService;
     private readonly IDocumentInsightService _documentInsightService;
+    private readonly IDocumentIngestionPipeline _ingestionPipeline;
 
     public DocumentsController(
         IDocumentService documentService,
-        IDocumentInsightService documentInsightService)
+        IDocumentInsightService documentInsightService,
+        IDocumentIngestionPipeline ingestionPipeline)
     {
         _documentService = documentService;
         _documentInsightService = documentInsightService;
+        _ingestionPipeline = ingestionPipeline;
     }
 
     [HttpGet]
@@ -49,6 +53,16 @@ public sealed class DocumentsController : ControllerBase
     {
         var result = await _documentInsightService.ClassifyAsync(id, cancellationToken);
         return Ok(DocumentDtoMapping.ToDto(result));
+    }
+
+    [HttpPost("{id:guid}/ingestion/run")]
+    [ProducesResponseType(typeof(DocumentDetailDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<DocumentDetailDto>> RunIngestion(Guid id, CancellationToken cancellationToken)
+    {
+        var document = await _ingestionPipeline.RunAsync(id, cancellationToken);
+        return Ok(DocumentDtoMapping.ToDto(document));
     }
 
     [HttpPost]
