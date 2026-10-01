@@ -16,5 +16,9 @@ public sealed class DocumentChunk
 
     public DateTimeOffset CreatedAtUtc { get; set; }
 
+    public float[]? Embedding { get; set; }
+
+    public string? EmbeddingModel { get; set; }
+
     public Document? Document { get; set; }
 }

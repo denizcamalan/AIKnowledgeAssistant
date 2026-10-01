@@ -153,6 +153,8 @@ Full rules: **[docs/development/ai-coding-guidelines.md](docs/development/ai-cod
 
 **P5-02 chunking:** TXT/MD extract + deterministic chunks with offsets; `GET /api/documents/{id}/chunks`; see [docs/development/text-chunking.md](docs/development/text-chunking.md).
 
+**P5-03 embeddings:** Ollama batch embed → pgvector column; dimension guard; see [docs/development/embeddings.md](docs/development/embeddings.md).
+
 **P1-07 tests:** xUnit unit suite + `WebApplicationFactory` integration tests; see [docs/development/testing.md](docs/development/testing.md) and [ADR-002](docs/adr/ADR-002-test-strategy.md).
 
 **P2-01 JWT:** `POST /api/auth/login`, protected `GET /api/account/me`; see [docs/development/jwt-authentication.md](docs/development/jwt-authentication.md).

@@ -9,7 +9,9 @@ public sealed record DocumentChunkResult(
     int ChunkIndex,
     string Text,
     int StartOffset,
-    int EndOffset);
+    int EndOffset,
+    bool HasEmbedding,
+    string? EmbeddingModel);
 
 public interface IDocumentChunkService
 {
@@ -44,7 +46,9 @@ public sealed class DocumentChunkService : IDocumentChunkService
                 c.ChunkIndex,
                 c.Text,
                 c.StartOffset,
-                c.EndOffset))
+                c.EndOffset,
+                c.Embedding is { Length: > 0 },
+                c.EmbeddingModel))
             .ToList();
     }
 }

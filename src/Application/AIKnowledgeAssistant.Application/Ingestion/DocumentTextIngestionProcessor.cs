@@ -2,6 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using AIKnowledgeAssistant.Application.Configuration;
 using AIKnowledgeAssistant.Application.Documents;
+using AIKnowledgeAssistant.Application.Embeddings;
 using AIKnowledgeAssistant.Domain.Documents;
 using Microsoft.Extensions.Options;
 
@@ -13,6 +14,7 @@ public sealed class DocumentTextIngestionProcessor : IDocumentIngestionProcessor
     private readonly ITextExtractor _textExtractor;
     private readonly ITextChunker _chunker;
     private readonly IDocumentChunkRepository _chunkRepository;
+    private readonly IChunkEmbeddingService _chunkEmbeddingService;
     private readonly IngestionOptions _options;
     private readonly TimeProvider _timeProvider;
 
@@ -21,6 +23,7 @@ public sealed class DocumentTextIngestionProcessor : IDocumentIngestionProcessor
         ITextExtractor textExtractor,
         ITextChunker chunker,
         IDocumentChunkRepository chunkRepository,
+        IChunkEmbeddingService chunkEmbeddingService,
         IOptions<IngestionOptions> options,
         TimeProvider timeProvider)
     {
@@ -28,6 +31,7 @@ public sealed class DocumentTextIngestionProcessor : IDocumentIngestionProcessor
         _textExtractor = textExtractor;
         _chunker = chunker;
         _chunkRepository = chunkRepository;
+        _chunkEmbeddingService = chunkEmbeddingService;
         _options = options.Value;
         _timeProvider = timeProvider;
     }
@@ -59,6 +63,7 @@ public sealed class DocumentTextIngestionProcessor : IDocumentIngestionProcessor
             .ToList();
 
         await _chunkRepository.ReplaceForDocumentAsync(document.Id, chunks, cancellationToken);
+        await _chunkEmbeddingService.EmbedDocumentAsync(document.Id, cancellationToken);
     }
 
     internal static Guid CreateChunkId(Guid documentId, int chunkIndex)

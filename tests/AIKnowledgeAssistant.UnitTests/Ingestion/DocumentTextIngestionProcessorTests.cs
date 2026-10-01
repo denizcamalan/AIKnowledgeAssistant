@@ -2,6 +2,7 @@ using AIKnowledgeAssistant.Application.Configuration;
 using AIKnowledgeAssistant.Application.Ingestion;
 using AIKnowledgeAssistant.Domain.Documents;
 using AIKnowledgeAssistant.UnitTests.Documents;
+using AIKnowledgeAssistant.UnitTests.Embeddings;
 using Microsoft.Extensions.Options;
 
 namespace AIKnowledgeAssistant.UnitTests.Ingestion;
@@ -39,6 +40,7 @@ public sealed class DocumentTextIngestionProcessorTests
             new PlainTextExtractor(),
             new DeterministicTextChunker(),
             chunks,
+            new NoOpChunkEmbeddingService(),
             Options.Create(new IngestionOptions { ChunkSize = 10, ChunkOverlap = 2 }),
             TimeProvider.System);
 

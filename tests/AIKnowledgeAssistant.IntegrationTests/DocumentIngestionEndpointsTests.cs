@@ -49,6 +49,8 @@ public sealed class DocumentIngestionEndpointsTests : IClassFixture<CustomWebApp
         Assert.NotEmpty(chunkList);
         Assert.Equal(0, chunkList[0].ChunkIndex);
         Assert.True(chunkList[0].EndOffset > chunkList[0].StartOffset);
+        Assert.True(chunkList[0].HasEmbedding);
+        Assert.False(string.IsNullOrWhiteSpace(chunkList[0].EmbeddingModel));
     }
 
     [PostgresFact]

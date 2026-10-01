@@ -10,4 +10,6 @@ public interface IDocumentChunkRepository
         Guid documentId,
         IReadOnlyList<DocumentChunk> chunks,
         CancellationToken cancellationToken);
+
+    Task UpdateEmbeddingsAsync(IReadOnlyList<DocumentChunk> chunks, CancellationToken cancellationToken);
 }

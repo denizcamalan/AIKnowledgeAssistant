@@ -1,5 +1,6 @@
 using AIKnowledgeAssistant.Application.Auth;
 using AIKnowledgeAssistant.Application.Chat;
+using AIKnowledgeAssistant.Application.Embeddings;
 using AIKnowledgeAssistant.Domain.Documents;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -112,6 +113,14 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
                 "Unauthorized",
                 IsClientError: true),
             AiChatProviderException => new ExceptionMapping(
+                StatusCodes.Status502BadGateway,
+                "Bad Gateway",
+                IsClientError: true),
+            AiEmbeddingProviderException => new ExceptionMapping(
+                StatusCodes.Status502BadGateway,
+                "Bad Gateway",
+                IsClientError: true),
+            EmbeddingDimensionMismatchException => new ExceptionMapping(
                 StatusCodes.Status502BadGateway,
                 "Bad Gateway",
                 IsClientError: true),

@@ -38,4 +38,4 @@ Each row stores:
 ## Related
 
 - [document-ingestion-pipeline.md](document-ingestion-pipeline.md)
-- P5-03 embeddings (next)
+- P5-03 embeddings — [embeddings.md](embeddings.md)

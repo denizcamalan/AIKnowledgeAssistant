@@ -40,4 +40,21 @@ internal sealed class EfDocumentChunkRepository : IDocumentChunkRepository
 
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task UpdateEmbeddingsAsync(IReadOnlyList<DocumentChunk> chunks, CancellationToken cancellationToken)
+    {
+        foreach (var chunk in chunks)
+        {
+            var tracked = await _dbContext.DocumentChunks.FirstOrDefaultAsync(c => c.Id == chunk.Id, cancellationToken);
+            if (tracked is null)
+            {
+                continue;
+            }
+
+            tracked.Embedding = chunk.Embedding;
+            tracked.EmbeddingModel = chunk.EmbeddingModel;
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
 }

@@ -4,6 +4,7 @@ using AIKnowledgeAssistant.Application.Chat.PromptLab;
 using AIKnowledgeAssistant.Application.Chat.Tokens;
 using AIKnowledgeAssistant.Application.Documents;
 using AIKnowledgeAssistant.Application.Documents.StructuredOutput;
+using AIKnowledgeAssistant.Application.Embeddings;
 using AIKnowledgeAssistant.Application.Ingestion;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -29,6 +30,7 @@ public static class DependencyInjection
         services.AddSingleton<ITextExtractor, PlainTextExtractor>();
         services.AddScoped<IDocumentIngestionProcessor, DocumentTextIngestionProcessor>();
         services.AddScoped<IDocumentChunkService, DocumentChunkService>();
+        services.AddScoped<IChunkEmbeddingService, ChunkEmbeddingService>();
         return services;
     }
 }

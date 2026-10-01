@@ -17,7 +17,9 @@ public sealed record DocumentChunkDto(
     int ChunkIndex,
     string Text,
     int StartOffset,
-    int EndOffset);
+    int EndOffset,
+    bool HasEmbedding,
+    string? EmbeddingModel);
 
 public sealed record DocumentSummaryDto(
     Guid Id,
@@ -78,7 +80,15 @@ public static class DocumentDtoMapping
             ingestion.CompletedAtUtc);
 
     public static DocumentChunkDto ToDto(DocumentChunkResult chunk) =>
-        new(chunk.Id, chunk.DocumentId, chunk.ChunkIndex, chunk.Text, chunk.StartOffset, chunk.EndOffset);
+        new(
+            chunk.Id,
+            chunk.DocumentId,
+            chunk.ChunkIndex,
+            chunk.Text,
+            chunk.StartOffset,
+            chunk.EndOffset,
+            chunk.HasEmbedding,
+            chunk.EmbeddingModel);
 
     public static DocumentClassificationResponseDto ToDto(DocumentClassificationResult result) =>
         new()

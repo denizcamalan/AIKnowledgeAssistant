@@ -1,9 +1,12 @@
 using AIKnowledgeAssistant.Infrastructure.Persistence;
+using AIKnowledgeAssistant.Application.Embeddings;
+using AIKnowledgeAssistant.IntegrationTests.Stubs;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace AIKnowledgeAssistant.IntegrationTests;
 
@@ -39,7 +42,14 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 ["DocumentStorage:RootPath"] = _uploadRoot,
                 ["ConnectionStrings:DefaultConnection"] = connectionString,
                 ["Jwt:SigningKey"] = "integration-test-signing-key-min-32-chars",
+                ["Embeddings:ExpectedDimensions"] = "768",
             });
+        });
+
+        builder.ConfigureServices(services =>
+        {
+            services.RemoveAll<IEmbeddingClientFactory>();
+            services.AddSingleton<IEmbeddingClientFactory, StubEmbeddingClientFactory>();
         });
     }
 

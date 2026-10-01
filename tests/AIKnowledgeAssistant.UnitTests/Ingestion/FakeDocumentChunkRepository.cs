@@ -21,4 +21,26 @@ internal sealed class FakeDocumentChunkRepository : IDocumentChunkRepository
         _byDocument[documentId] = chunks.OrderBy(c => c.ChunkIndex).ToList();
         return Task.CompletedTask;
     }
+
+    public Task UpdateEmbeddingsAsync(IReadOnlyList<DocumentChunk> chunks, CancellationToken cancellationToken)
+    {
+        foreach (var chunk in chunks)
+        {
+            if (!_byDocument.TryGetValue(chunk.DocumentId, out var list))
+            {
+                continue;
+            }
+
+            var index = list.FindIndex(c => c.Id == chunk.Id);
+            if (index < 0)
+            {
+                continue;
+            }
+
+            list[index].Embedding = chunk.Embedding;
+            list[index].EmbeddingModel = chunk.EmbeddingModel;
+        }
+
+        return Task.CompletedTask;
+    }
 }
